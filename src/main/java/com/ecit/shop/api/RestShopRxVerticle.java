@@ -251,10 +251,11 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         commodityHandler.searchCommodity(keyword, category, Optional.ofNullable(params.getInteger("pageSize")).orElse(12), page, handler -> {
             LOGGER.info("查询商品结束线程：{}, search time:{}", Thread.currentThread().getName(), System.currentTimeMillis() - start);
             if(handler.failed()){
-                this.returnWithFailureMessage(context, "暂无该商品！");
                 LOGGER.error("搜索商品异常：", handler.cause());
+                this.returnWithFailureMessage(context, "暂无该商品！");
                 return ;
             }
+            LOGGER.info("es result: {}", handler.result());
             if(Objects.isNull(handler.result())){
                 this.returnWithFailureMessage(context, "暂无该商品！");
                 return ;
