@@ -1,0 +1,30 @@
+{
+  "instances": 2,
+  "user.api.name": "user",
+  "user.http.address": "0.0.0.0",
+  "user.http.port": 8787,
+  "host" : "111.231.132.168",
+  "port" : 5432,
+  "maxPoolSize" : 50,
+  "username" : "postgres",
+  "password" : "h123456",
+  "database" : "shop_miniprogram",
+  "charset" : "UTF-8",
+  "queryTimeout" : 10000,
+  "weixin.appid" : "wxf98bdcd6150b7e33",
+  "weixin.secret" : "35b319c6a9aee16e3977bf0d0d24ff7e",
+  "redis":{
+      "host": "111.231.132.168",
+      "port": 6379,
+      "password": "h123456"
+  },
+  "address":"eb.elasticsearch",
+  "transportAddresses":[
+    {
+      "hostname":"111.231.132.168",
+      "port":9300
+    }
+  ],
+  "cluster_name":"vertx_shop",
+  "client_transport_sniff":false
+}
