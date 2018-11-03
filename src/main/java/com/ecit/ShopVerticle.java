@@ -1,6 +1,7 @@
 package com.ecit;
 
 import com.ecit.common.rx.BaseMicroserviceRxVerticle;
+import com.ecit.shop.api.ElasticSearchServiceVerticle;
 import com.ecit.shop.api.RestShopRxVerticle;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.GroupConfig;
@@ -21,6 +22,7 @@ public class ShopVerticle extends BaseMicroserviceRxVerticle{
     public void start() throws Exception {
         super.start();
         vertx.getDelegate().deployVerticle(RestShopRxVerticle.class, new DeploymentOptions().setConfig(this.config()).setInstances(this.config().getInteger("instances", 1)));
+        vertx.getDelegate().deployVerticle(ElasticSearchServiceVerticle.class, new DeploymentOptions().setConfig(this.config()).setInstances(this.config().getInteger("instances", 1)));
     }
 
     public static void main(String[] args) {
@@ -34,6 +36,7 @@ public class ShopVerticle extends BaseMicroserviceRxVerticle{
         VertxOptions options = new VertxOptions().setClusterManager(mgr);
         Vertx.rxClusteredVertx(options).subscribe(v -> v.deployVerticle(ShopVerticle.class.getName(),
                 new DeploymentOptions().setConfig(new JsonObject()
+                        .put("instances", 2)
                         .put("user.api.name", "user")
                         .put("account.api.name", "account")
                         .put("host", "111.231.132.168")

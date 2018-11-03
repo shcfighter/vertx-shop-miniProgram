@@ -4,7 +4,10 @@ import com.ecit.common.db.JdbcRxRepositoryWrapper;
 import com.ecit.shop.constants.CategorySql;
 import com.ecit.shop.handler.ICommodityHandler;
 import com.hubrick.vertx.elasticsearch.RxElasticSearchService;
-import com.hubrick.vertx.elasticsearch.model.*;
+import com.hubrick.vertx.elasticsearch.model.SearchOptions;
+import com.hubrick.vertx.elasticsearch.model.SearchResponse;
+import com.hubrick.vertx.elasticsearch.model.SearchType;
+import com.hubrick.vertx.elasticsearch.model.SortOrder;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -35,7 +38,7 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
         super(vertx, config);
         this.vertx = vertx;
         this.config = config;
-        rxElasticSearchService = RxElasticSearchService.createEventBusProxy(vertx.getDelegate(), config.getString("address"));
+        this.rxElasticSearchService = RxElasticSearchService.createEventBusProxy(this.vertx.getDelegate(), config.getString("address"));
     }
 
 
@@ -76,8 +79,8 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
                 .setQuery(searchJson)
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                 .setFetchSource(true).setSize(pageSize).setFrom(this.calcPage(page, pageSize))
-                //.addFieldSort("commodity_id", SortOrder.DESC)
-                .addScripSort("Math.random()", ScriptSortOption.Type.NUMBER, new JsonObject(), SortOrder.DESC); //随机排序
+                .addFieldSort("commodity_id", SortOrder.DESC);
+                //.addScripSort("Math.random()", ScriptSortOption.Type.NUMBER, new JsonObject(), SortOrder.DESC); //随机排序
         rxElasticSearchService.search(SHOP_INDICES, searchOptions)
                 .subscribe(future::complete, future::fail);
         future.setHandler(handler);

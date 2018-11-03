@@ -81,12 +81,12 @@
 
     <loggers>
         <root level="all">
-            <!--<appender-ref ref="Console"/>-->
+            <appender-ref ref="Console"/>
             <appender-ref ref="RollingFileInfo"/>
-            <!--<appender-ref ref="RollingFileWarn"/>
+            <appender-ref ref="RollingFileWarn"/>
             <appender-ref ref="RollingFileError"/>
             <appender-ref ref="RollingFileDebug"/>
-            <appender-ref ref="RollingFileTrace"/>-->
+            <appender-ref ref="RollingFileTrace"/>
         </root>
 
         <!-- sql loggers -->
