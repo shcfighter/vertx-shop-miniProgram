@@ -51,6 +51,9 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
     public ICommodityHandler searchCommodity(String keyword, String category, int pageSize, int page, Handler<AsyncResult<SearchResponse>> handler) {
         Future<SearchResponse> future = Future.future();
         JsonObject searchJson = null;
+        if(StringUtils.equals("全部", category)){
+            category = null;
+        }
         if (StringUtils.isBlank(keyword) && StringUtils.isBlank(category)) {
             searchJson = new JsonObject("{\"match_all\": {}}");
         } else {
