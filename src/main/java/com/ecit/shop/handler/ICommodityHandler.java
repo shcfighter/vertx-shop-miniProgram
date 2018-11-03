@@ -1,5 +1,6 @@
 package com.ecit.shop.handler;
 
+import com.hubrick.vertx.elasticsearch.model.SearchResponse;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
@@ -18,5 +19,8 @@ public interface ICommodityHandler {
 
     @Fluent
     ICommodityHandler category(Handler<AsyncResult<List<JsonObject>>> handler);
+
+    @Fluent
+    ICommodityHandler searchCommodity(String keyword, String category, int pageSize, int page, Handler<AsyncResult<SearchResponse>> handler);
 
 }

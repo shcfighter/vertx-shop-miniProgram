@@ -10,6 +10,7 @@ import com.ecit.shop.handler.impl.AddressHandler;
 import com.ecit.shop.handler.impl.BannerHandler;
 import com.ecit.shop.handler.impl.CommodityHandler;
 import com.ecit.shop.handler.impl.UserHandler;
+import com.hubrick.vertx.elasticsearch.model.SearchResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -17,6 +18,10 @@ import io.vertx.reactivex.ext.web.handler.BodyHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by shwang on 2018/2/2.
@@ -49,6 +54,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
 
         router.get("/api/banner").handler(this::bannerHandler);       //获取banner信息
         router.get("/api/category").handler(this::categoryHandler);     //获取category信息
+        router.post("/api/commodity/search").handler(this::searchHandler);     //搜索商品信息
 
         router.getDelegate().route().handler(ShopUserSessionHandler.create(vertx.getDelegate(), this.config()));
 
@@ -229,6 +235,35 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
             }
             this.returnWithSuccessMessage(context, "获取商品类别信息成功", hander.result());
             return;
+        });
+    }
+
+    /**
+     * 搜索商品信息
+     * @param context
+     */
+    private void searchHandler(RoutingContext context){
+        final JsonObject params = context.getBodyAsJson();
+        final String keyword = params.getString("keyword");
+        final String category = params.getString("category");
+        final int page = Optional.ofNullable(params.getInteger("page")).orElse(1);
+        long start = System.currentTimeMillis();
+        commodityHandler.searchCommodity(keyword, category, Optional.ofNullable(params.getInteger("pageSize")).orElse(12), page, handler -> {
+            LOGGER.info("查询商品结束线程：{}, search time:{}", Thread.currentThread().getName(), System.currentTimeMillis() - start);
+            if(handler.failed()){
+                this.returnWithFailureMessage(context, "暂无该商品！");
+                LOGGER.error("搜索商品异常：", handler.cause());
+                return ;
+            }
+            if(Objects.isNull(handler.result())){
+                this.returnWithFailureMessage(context, "暂无该商品！");
+                return ;
+            }
+            final SearchResponse result = handler.result();
+            JsonObject resultJsonObject = new JsonObject()
+                    .put("items", result.getHits().getHits().stream().map(hit -> hit.getSource()).collect(Collectors.toList()));
+            this.returnWithSuccessMessage(context, "查询成功", result.getHits().getTotal().intValue(), resultJsonObject, page);
+            return ;
         });
     }
 }
