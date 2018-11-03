@@ -257,15 +257,13 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 this.returnWithFailureMessage(context, "暂无该商品！");
                 return ;
             }
-            LOGGER.info("es result: {}", handler.result());
             if(Objects.isNull(handler.result())){
                 this.returnWithFailureMessage(context, "暂无该商品！");
                 return ;
             }
             final SearchResponse result = handler.result();
-            JsonObject resultJsonObject = new JsonObject()
-                    .put("items", result.getHits().getHits().stream().map(hit -> hit.getSource()).collect(Collectors.toList()));
-            this.returnWithSuccessMessage(context, "查询成功", result.getHits().getTotal().intValue(), resultJsonObject, page);
+            this.returnWithSuccessMessage(context, "查询成功", result.getHits().getTotal().intValue(),
+                    result.getHits().getHits().stream().map(hit -> hit.getSource()).collect(Collectors.toList()), page);
             return ;
         });
     }
