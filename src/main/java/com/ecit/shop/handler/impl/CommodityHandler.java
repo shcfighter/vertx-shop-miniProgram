@@ -2,12 +2,14 @@ package com.ecit.shop.handler.impl;
 
 import com.ecit.common.db.JdbcRxRepositoryWrapper;
 import com.ecit.shop.constants.CategorySql;
+import com.ecit.shop.constants.CommoditySql;
 import com.ecit.shop.handler.ICommodityHandler;
 import com.hubrick.vertx.elasticsearch.RxElasticSearchService;
 import com.hubrick.vertx.elasticsearch.model.*;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
 import org.apache.commons.lang3.StringUtils;
@@ -101,6 +103,14 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
                 .setSize(1);
         rxElasticSearchService.search(SHOP_INDICES, searchOptions)
                 .subscribe(future::complete, future::fail);
+        future.setHandler(handler);
+        return this;
+    }
+
+    @Override
+    public ICommodityHandler findCommodityPrice(long commodityId, String attributeName, Handler<AsyncResult<JsonObject>> handler) {
+        Future<JsonObject> future = Future.future();
+        this.retrieveOne(new JsonArray().add(commodityId).add(attributeName), CommoditySql.COMMODITY_PRICE_SQL).subscribe(future::complete, future::fail);
         future.setHandler(handler);
         return this;
     }

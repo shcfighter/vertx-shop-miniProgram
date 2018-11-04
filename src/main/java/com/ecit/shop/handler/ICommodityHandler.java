@@ -26,4 +26,7 @@ public interface ICommodityHandler {
     @Fluent
     ICommodityHandler findCommodityFromEsById(long id, Handler<AsyncResult<SearchResponse>> handler);
 
+    @Fluent
+    ICommodityHandler findCommodityPrice(long commodityId, String attributeName, Handler<AsyncResult<JsonObject>> handler);
+
 }

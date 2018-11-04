@@ -60,6 +60,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.get("/api/category").handler(this::categoryHandler);     //获取category信息
         router.post("/api/commodity/search").handler(this::searchHandler);     //搜索商品信息
         router.get("/api/commodity/detail/:id").handler(this::findCommodityFromESByIdHandler);     //搜索商品信息
+        router.post("/api/commodity/price/:id").handler(this::findCommodityPriceHandler);     //搜索商品信息
 
         router.getDelegate().route().handler(ShopUserSessionHandler.create(vertx.getDelegate(), this.config()));
 
@@ -308,6 +309,24 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 this.returnWithSuccessMessage(context, "查询商品信息详情成功", result);
                 return ;
             }
+        });
+    }
+
+    /**
+     *  获取商品价格
+     * @param context
+     */
+    private void findCommodityPriceHandler(RoutingContext context){
+        JsonObject params = context.getBodyAsJson();
+        commodityHandler.findCommodityPrice(Long.parseLong(context.pathParam("id")), params.getString("propertyChildNames"),
+                hander -> {
+            if(hander.failed()){
+                LOGGER.info("获取商品价格信息失败:", hander.cause());
+                this.returnWithFailureMessage(context, "获取商品价格信息失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "获取商品价格信息成功", hander.result());
+            return;
         });
     }
 }
