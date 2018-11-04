@@ -287,8 +287,8 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 JsonArray images = items.getJsonArray("detail_image_url");
                 JsonArray commodityParams = items.getJsonArray("commodity_params");
                 StringBuilder content = new StringBuilder();
-                if(Objects.nonNull(commodityParams) || !commodityParams.isEmpty()){
-                    images.forEach(param -> {
+                if(Objects.nonNull(commodityParams) && !commodityParams.isEmpty()){
+                    commodityParams.forEach(param -> {
                         content.append("<p>");
                         content.append(param);
                         content.append("</p>");
