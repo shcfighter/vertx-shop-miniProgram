@@ -25,7 +25,7 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
     /**
      * es商品索引indeces
      */
-    private static final String SHOP_INDICES = "shop";
+    private static final String SHOP_INDICES = "shop_miniprogram";
 
     final RxElasticSearchService rxElasticSearchService;
 
