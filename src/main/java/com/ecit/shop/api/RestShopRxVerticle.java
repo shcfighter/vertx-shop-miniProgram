@@ -289,8 +289,8 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                     content.append("<p><img src=\"");
                     content.append(image);
                     content.append("\" style=\"\" title=\"");
-                    content.append("\"/></p>");
                     content.append(image);
+                    content.append("\"/></p>");
                 });
                 JsonObject result = new JsonObject().put("basicInfo", hits.getHits().get(0).getSource())
                         .put("properties", new JsonObject()).put("content", content.toString());
