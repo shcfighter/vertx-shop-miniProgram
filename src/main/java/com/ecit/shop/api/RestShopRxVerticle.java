@@ -13,6 +13,7 @@ import com.ecit.shop.handler.impl.CommodityHandler;
 import com.ecit.shop.handler.impl.UserHandler;
 import com.hubrick.vertx.elasticsearch.model.Hits;
 import com.hubrick.vertx.elasticsearch.model.SearchResponse;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -274,16 +275,25 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      * @param context
      */
     private void findCommodityFromESByIdHandler(RoutingContext context){
-        System.out.println(Long.parseLong(context.request().getParam("id")));
         commodityHandler.findCommodityFromEsById(Long.parseLong(context.request().getParam("id")), handler -> {
             if (handler.failed()) {
                 LOGGER.info("根据id查询商品失败：", handler.cause());
                 this.returnWithFailureMessage(context, "查询商品失败");
                 return ;
             } else {
-                System.out.println(handler.result());
                 final Hits hits = handler.result().getHits();
-                JsonObject result = new JsonObject().put("basicInfo", hits.getHits().get(0).getSource());
+                JsonObject items = hits.getHits().get(0).getSource();
+                JsonArray images = items.getJsonArray("detail_image_url");
+                StringBuilder content = new StringBuilder();
+                images.forEach(image -> {
+                    content.append("<p><img src=\"");
+                    content.append(image);
+                    content.append("\" style=\"\" title=\"");
+                    content.append("\"/></p>");
+                    content.append(image);
+                });
+                JsonObject result = new JsonObject().put("basicInfo", hits.getHits().get(0).getSource())
+                        .put("properties", new JsonObject()).put("content", content.toString());
                 this.returnWithSuccessMessage(context, "", result);
                 return ;
             }
