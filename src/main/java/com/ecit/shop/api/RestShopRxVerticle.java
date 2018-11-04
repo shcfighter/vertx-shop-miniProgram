@@ -288,6 +288,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 images.forEach(image -> {
                     content.append("<p><img src=\"");
                     content.append(image);
+                    content.append("_m");
                     content.append("\" style=\"\" title=\"");
                     content.append(image);
                     content.append("\"/></p>");
