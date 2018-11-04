@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -293,8 +294,10 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                     content.append(image);
                     content.append("\"/></p>");
                 });
+                JsonObject properties = new JsonObject().put("name", "尺寸").put("childsCurGoods", List.of(new JsonObject().put("name", "130"), new JsonObject().put("name", "140"), new JsonObject().put("name", "150")))
+                JsonObject properties2 = new JsonObject().put("name", "颜色").put("childsCurGoods", List.of(new JsonObject().put("name", "红色"), new JsonObject().put("name", "绿色"), new JsonObject().put("name", "黑色")))
                 JsonObject result = new JsonObject().put("basicInfo", hits.getHits().get(0).getSource())
-                        .put("properties", new JsonObject()).put("content", content.toString());
+                        .put("properties", new JsonObject()).put("content", content.toString()).put("properties", List.of(properties, properties2));
                 this.returnWithSuccessMessage(context, "", result);
                 return ;
             }
