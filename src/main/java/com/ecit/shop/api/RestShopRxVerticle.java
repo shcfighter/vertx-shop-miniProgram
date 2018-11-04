@@ -1,6 +1,7 @@
 package com.ecit.shop.api;
 
 import com.ecit.auth.ShopUserSessionHandler;
+import com.ecit.common.result.ResultItems;
 import com.ecit.common.rx.RestAPIRxVerticle;
 import com.ecit.shop.handler.IAddressHandler;
 import com.ecit.shop.handler.IBannerHandler;
@@ -10,13 +11,12 @@ import com.ecit.shop.handler.impl.AddressHandler;
 import com.ecit.shop.handler.impl.BannerHandler;
 import com.ecit.shop.handler.impl.CommodityHandler;
 import com.ecit.shop.handler.impl.UserHandler;
+import com.hubrick.vertx.elasticsearch.model.Hits;
 import com.hubrick.vertx.elasticsearch.model.SearchResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.handler.BodyHandler;
-import io.vertx.serviceproxy.ServiceBinder;
-import io.vertx.serviceproxy.ServiceProxyBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,6 +57,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.get("/api/banner").handler(this::bannerHandler);       //获取banner信息
         router.get("/api/category").handler(this::categoryHandler);     //获取category信息
         router.post("/api/commodity/search").handler(this::searchHandler);     //搜索商品信息
+        router.post("/api/commodity/detail/:id").handler(this::findCommodityFromESByIdHandler);     //搜索商品信息
 
         router.getDelegate().route().handler(ShopUserSessionHandler.create(vertx.getDelegate(), this.config()));
 
@@ -265,6 +266,26 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
             this.returnWithSuccessMessage(context, "查询成功", result.getHits().getTotal().intValue(),
                     result.getHits().getHits().stream().map(hit -> hit.getSource()).collect(Collectors.toList()), page);
             return ;
+        });
+    }
+
+    /**
+     * 根据商品id查询详情信息(数据源：elasticsearch)
+     * @param context
+     */
+    private void findCommodityFromESByIdHandler(RoutingContext context){
+        commodityHandler.findCommodityFromEsById(Long.parseLong(context.request().getParam("id")), handler -> {
+            if (handler.failed()) {
+                LOGGER.error("根据id查询商品失败：", handler.cause());
+                this.returnWithFailureMessage(context, "查询商品失败");
+                return ;
+            } else {
+                final Hits hits = handler.result().getHits();
+                JsonObject result = new JsonObject().put("basicInfo", hits.getHits().get(0).getSource());
+                this.returnWithSuccessMessage(context, "",
+                        ResultItems.getReturnItemsSuccess(hits.getTotal().intValue(), result));
+                return ;
+            }
         });
     }
 }

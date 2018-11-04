@@ -86,4 +86,22 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
         future.setHandler(handler);
         return this;
     }
+
+    @Override
+    public ICommodityHandler findCommodityFromEsById(long id, Handler<AsyncResult<SearchResponse>> handler) {
+        Future<SearchResponse> future = Future.future();
+        final SearchOptions searchOptions = new SearchOptions()
+                .setQuery(new JsonObject("{" +
+                        "       \"match\":{" +
+                        "           \"commodity_id\": \"" + id + "\"" +
+                        "       }" +
+                        "}"))
+                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+                .setFetchSource(true)
+                .setSize(1);
+        rxElasticSearchService.search(SHOP_INDICES, searchOptions)
+                .subscribe(future::complete, future::fail);
+        future.setHandler(handler);
+        return this;
+    }
 }

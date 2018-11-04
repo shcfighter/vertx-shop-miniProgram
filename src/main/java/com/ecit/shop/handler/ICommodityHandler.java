@@ -23,4 +23,7 @@ public interface ICommodityHandler {
     @Fluent
     ICommodityHandler searchCommodity(String keyword, String category, int pageSize, int page, Handler<AsyncResult<SearchResponse>> handler);
 
+    @Fluent
+    ICommodityHandler findCommodityFromEsById(long id, Handler<AsyncResult<SearchResponse>> handler);
+
 }
