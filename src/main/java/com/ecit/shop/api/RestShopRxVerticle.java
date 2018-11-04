@@ -274,12 +274,14 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      * @param context
      */
     private void findCommodityFromESByIdHandler(RoutingContext context){
+        System.out.println(Long.parseLong(context.request().getParam("id")));
         commodityHandler.findCommodityFromEsById(Long.parseLong(context.request().getParam("id")), handler -> {
             if (handler.failed()) {
-                LOGGER.error("根据id查询商品失败：", handler.cause());
+                LOGGER.info("根据id查询商品失败：", handler.cause());
                 this.returnWithFailureMessage(context, "查询商品失败");
                 return ;
             } else {
+                System.out.println(handler.result());
                 final Hits hits = handler.result().getHits();
                 JsonObject result = new JsonObject().put("basicInfo", hits.getHits().get(0).getSource());
                 this.returnWithSuccessMessage(context, "",
