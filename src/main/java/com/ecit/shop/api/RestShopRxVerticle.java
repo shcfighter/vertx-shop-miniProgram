@@ -71,7 +71,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         /**
          * 购物车
          */
-        router.post("/api/insertCart").handler(this::insertAddressHandler);      //新增购物车
+        router.post("/api/insertCart").handler(this::insertCartHandler);      //新增购物车
         router.get("/api/cartList").handler(this::cartListHandler);        //购物车列表
 
 
