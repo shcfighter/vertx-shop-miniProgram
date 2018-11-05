@@ -25,7 +25,7 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
         sessionFuture.compose(session -> {
             final long userId = session.getLong("user_id");
             Future<Integer> resultFuture = Future.future();
-            this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(params.getLong("commodty_id"))
+            this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(params.getLong("commodity_id"))
                     .add(params.getString("commodity_name")).add(params.getInteger("num")).add(params.getString("price"))
                     .add(params.getString("image_url")).add(params.getString("specifition_name")), CartSql.INSERT_CART_SQL).
                     subscribe(resultFuture::complete, resultFuture::fail);

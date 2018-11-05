@@ -54,8 +54,8 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.get("/api/banner").handler(this::bannerHandler);       //获取banner信息
         router.get("/api/category").handler(this::categoryHandler);     //获取category信息
         router.post("/api/commodity/search").handler(this::searchHandler);     //搜索商品信息
-        router.get("/api/commodity/detail/:id").handler(this::findCommodityFromESByIdHandler);     //搜索商品信息
-        router.post("/api/commodity/price/:id").handler(this::findCommodityPriceHandler);     //搜索商品信息
+        router.get("/api/commodity/detail/:id").handler(this::findCommodityFromESByIdHandler);     //搜索商品详情信息
+        router.post("/api/commodity/price/:id").handler(this::findCommodityPriceHandler);     //查询商品价格
 
         router.getDelegate().route().handler(ShopUserSessionHandler.create(vertx.getDelegate(), this.config()));
 
