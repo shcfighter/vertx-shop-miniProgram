@@ -12,6 +12,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
 
 import java.util.List;
+import java.util.Objects;
 
 public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler {
 
@@ -24,12 +25,24 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
             final long userId = session.getLong("user_id");
-            Future<Integer> resultFuture = Future.future();
-            this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(params.getLong("commodity_id"))
-                    .add(params.getString("commodity_name")).add(params.getInteger("num")).add(params.getString("price"))
-                    .add(params.getString("image_url")).add(params.getString("specifition_name")), CartSql.INSERT_CART_SQL).
-                    subscribe(resultFuture::complete, resultFuture::fail);
-            return resultFuture;
+            Future<JsonObject> cartFuture = Future.future();
+            this.retrieveOne(new JsonArray().add(userId).add(params.getLong("commodity_id")).add(params.getString("specifition_name")),
+                    CartSql.SELECT_CART_SQL).subscribe(cartFuture::complete, cartFuture::fail);
+            return cartFuture.compose(cart -> {
+                Future<Integer> resultFuture = Future.future();
+                if(Objects.isNull(cart) || cart.isEmpty()){
+                    this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(params.getLong("commodity_id"))
+                            .add(params.getString("commodity_name")).add(params.getInteger("num")).add(params.getString("price"))
+                            .add(params.getString("image_url")).add(params.getString("specifition_name")), CartSql.INSERT_CART_SQL).
+                            subscribe(resultFuture::complete, resultFuture::fail);
+                }else{
+                    this.execute(new JsonArray().add(params.getInteger("num")).add(params.getString("price")).add(userId)
+                            .add(params.getLong("commodity_id")).add(params.getString("specifition_name"))
+                            .add(cart.getLong("versions")), CartSql.UPDAT_CART_NUM_SQL).
+                            subscribe(resultFuture::complete, resultFuture::fail);
+                }
+                return resultFuture;
+            });
         }).setHandler(handler);
         return this;
     }
