@@ -73,6 +73,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
          */
         router.post("/api/insertCart").handler(this::insertCartHandler);      //新增购物车
         router.get("/api/cartList").handler(this::cartListHandler);        //购物车列表
+        router.get("/api/findCart").handler(this::findCartHandler);        //购物车列表
 
 
 
@@ -352,6 +353,22 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      */
     private void cartListHandler(RoutingContext context){
         cartHandler.cartList(context.request().getHeader("token"), hander -> {
+            if(hander.failed()){
+                LOGGER.info("获取购物车失败:", hander.cause());
+                this.returnWithFailureMessage(context, "获取购物车失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "获取购物车成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 查询商品数量
+     * @param context
+     */
+    private void findCartHandler(RoutingContext context){
+        cartHandler.findCart(context.request().getHeader("token"), context.getBodyAsJson(), hander -> {
             if(hander.failed()){
                 LOGGER.info("获取购物车失败:", hander.cause());
                 this.returnWithFailureMessage(context, "获取购物车失败");

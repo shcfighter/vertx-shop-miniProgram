@@ -22,4 +22,7 @@ public interface ICartHandler {
     @Fluent
     ICartHandler cartList(String token, Handler<AsyncResult<List<JsonObject>>> handler);
 
+    @Fluent
+    ICartHandler findCart(String token, JsonObject params, Handler<AsyncResult<JsonObject>> handler);
+
 }

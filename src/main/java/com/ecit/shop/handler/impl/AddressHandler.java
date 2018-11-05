@@ -104,9 +104,9 @@ public class AddressHandler extends JdbcRxRepositoryWrapper implements IAddressH
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
             long userId = session.getLong("user_id");
-            Future<List<JsonObject>> addressFuture = Future.future();
-            this.retrieveMany(new JsonArray().add(userId), AddressSql.SELECT_ADDRESS_BY_USERID_SQL).subscribe(addressFuture::complete, addressFuture::fail);
-            return addressFuture;
+            Future<List<JsonObject>> resultFuture = Future.future();
+            this.retrieveMany(new JsonArray().add(userId), AddressSql.SELECT_ADDRESS_BY_USERID_SQL).subscribe(resultFuture::complete, resultFuture::fail);
+            return resultFuture;
         }).setHandler(handler);
         return this;
     }

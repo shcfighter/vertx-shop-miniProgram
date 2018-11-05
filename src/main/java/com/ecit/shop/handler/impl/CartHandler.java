@@ -39,9 +39,22 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
             long userId = session.getLong("user_id");
-            Future<List<JsonObject>> addressFuture = Future.future();
-            this.retrieveMany(new JsonArray().add(userId), CartSql.SELECT_CART_SQL).subscribe(addressFuture::complete, addressFuture::fail);
-            return addressFuture;
+            Future<List<JsonObject>> resultFuture = Future.future();
+            this.retrieveMany(new JsonArray().add(userId), CartSql.SELECT_CART_SQL).subscribe(resultFuture::complete, resultFuture::fail);
+            return resultFuture;
+        }).setHandler(handler);
+        return this;
+    }
+
+    @Override
+    public ICartHandler findCart(String token, JsonObject params, Handler<AsyncResult<JsonObject>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<JsonObject> resultFuture = Future.future();
+            this.retrieveOne(new JsonArray().add(userId).add(params.getLong("commodity_id")).add(params.getString("specifition_name")),
+                    CartSql.SELECT_CART_SQL).subscribe(resultFuture::complete, resultFuture::fail);
+            return resultFuture;
         }).setHandler(handler);
         return this;
     }
