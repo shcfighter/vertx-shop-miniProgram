@@ -23,6 +23,6 @@ public interface CartSql {
     /**
      * 修改购物车商品数量
      */
-    String UPDAT_CART_NUM_SQL = "update t_cart set num = (num + ?), price = ?, versions = (versions + 1), update_time = now() where user_id = ? and commodity_id = ? and specifition_name = ? and versions = ? and is_deleted = 0";
+    String UPDAT_CART_NUM_SQL = "update t_cart set num = ?, price = ?, versions = (versions + 1), update_time = now() where user_id = ? and commodity_id = ? and specifition_name = ? and versions = ? and is_deleted = 0";
 
 }
