@@ -1,16 +1,9 @@
 package com.ecit.shop.api;
 
 import com.ecit.auth.ShopUserSessionHandler;
-import com.ecit.common.result.ResultItems;
 import com.ecit.common.rx.RestAPIRxVerticle;
-import com.ecit.shop.handler.IAddressHandler;
-import com.ecit.shop.handler.IBannerHandler;
-import com.ecit.shop.handler.ICommodityHandler;
-import com.ecit.shop.handler.IUserHandler;
-import com.ecit.shop.handler.impl.AddressHandler;
-import com.ecit.shop.handler.impl.BannerHandler;
-import com.ecit.shop.handler.impl.CommodityHandler;
-import com.ecit.shop.handler.impl.UserHandler;
+import com.ecit.shop.handler.*;
+import com.ecit.shop.handler.impl.*;
 import com.hubrick.vertx.elasticsearch.model.Hits;
 import com.hubrick.vertx.elasticsearch.model.SearchResponse;
 import io.vertx.core.json.JsonArray;
@@ -22,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,6 +29,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
     private IAddressHandler addressHandler;
     private IBannerHandler bannerHandler;
     private ICommodityHandler commodityHandler;
+    private ICartHandler cartHandler;
 
     @Override
     public void start() throws Exception {
@@ -46,6 +39,8 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         this.addressHandler = new AddressHandler(vertx, this.config());
         this.bannerHandler = new BannerHandler(vertx, this.config());
         this.commodityHandler = new CommodityHandler(vertx, this.config());
+        this.cartHandler = new CartHandler(vertx, this.config());
+
         final Router router = Router.router(vertx);
         // cookie and session handler
         this.enableLocalSession(router, "shop_session");
@@ -73,7 +68,11 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.get("/api/addressList").handler(this::addressListHandler);        //收货地址列表
         router.get("/api/addressDetail/:id").handler(this::addressDetailHandler);       //收货地址详情
         router.delete("/api/delAddress/:id").handler(this::addressDelHandler);      //删除收货地址
-
+        /**
+         * 购物车
+         */
+        router.post("/api/insertCart").handler(this::insertAddressHandler);      //新增购物车
+        router.get("/api/cartList").handler(this::cartListHandler);        //购物车列表
 
 
 
@@ -326,6 +325,39 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 return;
             }
             this.returnWithSuccessMessage(context, "获取商品价格信息成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 新增购物车
+     * @param context
+     */
+    private void insertCartHandler(RoutingContext context){
+        JsonObject params = context.getBodyAsJson();
+        cartHandler.insertCart(context.request().getHeader("token"), params, hander -> {
+            if(hander.failed() || hander.result() <= 0){
+                LOGGER.info("新增购物车失败：", hander.cause());
+                this.returnWithFailureMessage(context, "新增购物车失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "新增购物车成功");
+            return ;
+        });
+    }
+
+    /**
+     * 购物车列表
+     * @param context 上下文
+     */
+    private void cartListHandler(RoutingContext context){
+        cartHandler.cartList(context.request().getHeader("token"), hander -> {
+            if(hander.failed()){
+                LOGGER.info("获取购物车失败:", hander.cause());
+                this.returnWithFailureMessage(context, "获取购物车失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "获取购物车成功", hander.result());
             return;
         });
     }
