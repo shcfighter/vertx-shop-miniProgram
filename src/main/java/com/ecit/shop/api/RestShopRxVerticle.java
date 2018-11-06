@@ -74,6 +74,8 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.post("/api/insertCart").handler(this::insertCartHandler);      //新增购物车
         router.get("/api/cartList").handler(this::cartListHandler);        //购物车列表
         router.get("/api/findCart").handler(this::findCartHandler);        //购物车列表
+        router.delete("/api/delCart/:id").handler(this::cartDelHandler);      //删除收货地址
+        router.delete("/api/delBatchCart").handler(this::cartDelBatchHandler);      //批量删除收货地址
 
 
 
@@ -378,4 +380,36 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
             return;
         });
     }
+
+    /**
+     * 删除购物车商品
+     * @param context
+     */
+    private void cartDelHandler(RoutingContext context){
+        cartHandler.delCart(context.request().getHeader("token"), Long.parseLong(context.pathParam("id")), context.getBodyAsJson(), hander -> {
+            if(hander.failed()){
+                LOGGER.info("删除购物车商品失败:", hander.cause());
+                this.returnWithFailureMessage(context, "删除购物车商品失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "删除购物车商品成功", hander.result());
+            return;
+        });
+    }
+    /**
+     * 批量删除购物车商品
+     * @param context
+     */
+    private void cartDelBatchHandler(RoutingContext context){
+        cartHandler.delBatchCart(context.request().getHeader("token"), context.getBodyAsJson(), hander -> {
+            if(hander.failed()){
+                LOGGER.info("批量删除购物车商品失败:", hander.cause());
+                this.returnWithFailureMessage(context, "批量删除购物车商品失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "批量删除购物车商品成功", hander.result());
+            return;
+        });
+    }
+
 }

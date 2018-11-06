@@ -2,17 +2,23 @@ package com.ecit.shop.handler.impl;
 
 import com.ecit.common.IdBuilder;
 import com.ecit.common.db.JdbcRxRepositoryWrapper;
+import com.ecit.common.utils.MustacheUtils;
 import com.ecit.shop.constants.CartSql;
 import com.ecit.shop.handler.ICartHandler;
+import com.google.common.collect.Lists;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler {
 
@@ -67,6 +73,50 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
             Future<JsonObject> resultFuture = Future.future();
             this.retrieveOne(new JsonArray().add(userId).add(params.getLong("commodity_id")).add(params.getString("specifition_name")),
                     CartSql.SELECT_CART_SQL).subscribe(resultFuture::complete, resultFuture::fail);
+            return resultFuture;
+        }).setHandler(handler);
+        return this;
+    }
+
+    @Override
+    public ICartHandler delCart(String token, long id, JsonObject params, Handler<AsyncResult<Integer>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            final long userId = session.getLong("user_id");
+            Future<JsonObject> cartFuture = Future.future();
+            this.retrieveOne(new JsonArray().add(userId).add(params.getLong("commodity_id")).add(params.getString("specifition_name")),
+                    CartSql.SELECT_CART_BY_SPECIFITION_SQL).subscribe(cartFuture::complete, cartFuture::fail);
+            return cartFuture.compose(cart -> {
+                if(Objects.isNull(cart) || cart.isEmpty()){
+                    Future.failedFuture("购物车中商品不存在！");
+                }
+                Future<Integer> resultFuture = Future.future();
+                this.execute(new JsonArray().add(userId)
+                        .add(params.getLong("commodity_id")).add(params.getString("specifition_name"))
+                        .add(cart.getLong("versions")), CartSql.DELETE_CART_SQL).
+                        subscribe(resultFuture::complete, resultFuture::fail);
+                return resultFuture;
+            });
+        }).setHandler(handler);
+        return this;
+    }
+
+    @Override
+    public ICartHandler delBatchCart(String token, JsonObject params, Handler<AsyncResult<Integer>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<Integer> resultFuture = Future.future();
+            JsonArray condition = new JsonArray().add(userId);
+            List<String> buffer = Lists.newArrayList();
+            Stream.of(StringUtils.split(params.getString("carts"), ",")).map(Long::parseLong)
+                    .forEach(id -> {
+                buffer.add("?");
+                condition.add(id);
+            });
+            this.execute(condition,
+                    MustacheUtils.mustacheString(CartSql.BATCH_DELETE_CART_SQL, Map.of("carts",buffer.stream().collect(Collectors.joining(",")))))
+                    .subscribe(resultFuture::complete, resultFuture::fail);
             return resultFuture;
         }).setHandler(handler);
         return this;
