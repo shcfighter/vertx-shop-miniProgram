@@ -55,6 +55,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.get("/api/category").handler(this::categoryHandler);     //获取category信息
         router.post("/api/commodity/search").handler(this::searchHandler);     //搜索商品信息
         router.get("/api/commodity/detail/:id").handler(this::findCommodityFromESByIdHandler);     //搜索商品详情信息
+        router.post("/api/commodity/specifition/price/:id").handler(this::findCommoditySpecifitionPriceHandler);     //查询商品价格
         router.post("/api/commodity/price/:id").handler(this::findCommodityPriceHandler);     //查询商品价格
 
         router.getDelegate().route().handler(ShopUserSessionHandler.create(vertx.getDelegate(), this.config()));
@@ -318,10 +319,26 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      *  获取商品价格
      * @param context
      */
-    private void findCommodityPriceHandler(RoutingContext context){
+    private void findCommoditySpecifitionPriceHandler(RoutingContext context){
         JsonObject params = context.getBodyAsJson();
-        commodityHandler.findCommodityPrice(Long.parseLong(context.pathParam("id")), params.getString("specifition_name"),
+        commodityHandler.findCommoditySpecifitionPrice(Long.parseLong(context.pathParam("id")), params.getString("specifition_name"),
                 hander -> {
+            if(hander.failed()){
+                LOGGER.info("获取商品价格信息失败:", hander.cause());
+                this.returnWithFailureMessage(context, "获取商品价格信息失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "获取商品价格信息成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     *  获取商品价格
+     * @param context
+     */
+    private void findCommodityPriceHandler(RoutingContext context){
+        commodityHandler.findCommodityPrice(Long.parseLong(context.pathParam("id")), hander -> {
             if(hander.failed()){
                 LOGGER.info("获取商品价格信息失败:", hander.cause());
                 this.returnWithFailureMessage(context, "获取商品价格信息失败");

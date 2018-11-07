@@ -6,9 +6,9 @@ package com.ecit.shop.constants;
 public interface CommoditySql {
 
     /**
-     * 获取banner信息
+     * 查询商品价格
      */
-    String SELECT_BANNER_SQL = "select * from t_banner where is_show = 1 and is_deleted = 0 order by sort";
+    String SELECT_COMMODITY_SQL = "select price::numeric, num, commodity_id::text from t_commodity commodity_id = ? and where is_show = 1 and is_deleted = 0";
 
     /**
      * 查询商品价格
