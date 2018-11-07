@@ -8,7 +8,7 @@ public interface CommoditySql {
     /**
      * 查询商品价格
      */
-    String SELECT_COMMODITY_SQL = "select price::numeric, num, commodity_id::text from t_commodity commodity_id = ? and where is_show = 1 and is_deleted = 0";
+    String SELECT_COMMODITY_SQL = "select price::numeric, num, commodity_id::text from t_commodity where commodity_id = ? and is_show = 1 and is_deleted = 0";
 
     /**
      * 查询商品价格
