@@ -320,7 +320,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      */
     private void findCommodityPriceHandler(RoutingContext context){
         JsonObject params = context.getBodyAsJson();
-        commodityHandler.findCommodityPrice(Long.parseLong(context.pathParam("id")), params.getString("propertyChildNames"),
+        commodityHandler.findCommodityPrice(Long.parseLong(context.pathParam("id")), params.getString("specifition_name"),
                 hander -> {
             if(hander.failed()){
                 LOGGER.info("获取商品价格信息失败:", hander.cause());

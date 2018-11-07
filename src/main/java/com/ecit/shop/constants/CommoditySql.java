@@ -13,6 +13,6 @@ public interface CommoditySql {
     /**
      * 查询商品价格
      */
-    String COMMODITY_PRICE_SQL = "select price::numeric, num, commodity_id from t_commodity_attribute where commodity_id = ? and attribute_name = ? and is_deleted = 0";
+    String COMMODITY_PRICE_SQL = "select price::numeric, num, commodity_id from t_commodity_specifition where commodity_id = ? and specifition_name = ? and is_deleted = 0";
 
 }
