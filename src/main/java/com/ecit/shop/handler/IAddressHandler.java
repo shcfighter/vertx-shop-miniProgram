@@ -34,7 +34,7 @@ public interface IAddressHandler {
     @Fluent
     IAddressHandler findDefaultAddress(String token, Handler<AsyncResult<JsonObject>> handler);
 
-    @Fluent
-    IAddressHandler updateDefaultAddress(String token, long addressId, Handler<AsyncResult<Integer>> handler);
+    /*@Fluent
+    IAddressHandler updateDefaultAddress(String token, long addressId, Handler<AsyncResult<Integer>> handler);*/
 
 }
