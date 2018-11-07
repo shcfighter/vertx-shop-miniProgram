@@ -112,7 +112,7 @@ public class AddressHandler extends JdbcRxRepositoryWrapper implements IAddressH
         return this;
     }
 
-    @Override
+    /*@Override
     public IAddressHandler findDefaultAddress(String token, Handler<AsyncResult<JsonObject>> handler) {
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
@@ -122,9 +122,9 @@ public class AddressHandler extends JdbcRxRepositoryWrapper implements IAddressH
             return resultFuture;
         }).setHandler(handler);
         return this;
-    }
+    }*/
 
-    /*@Override
+    @Override
     public IAddressHandler updateDefaultAddress(String token, long addressId, Handler<AsyncResult<Integer>> handler) {
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
@@ -143,5 +143,5 @@ public class AddressHandler extends JdbcRxRepositoryWrapper implements IAddressH
             });
         }).setHandler(handler);
         return this;
-    }*/
+    }
 }

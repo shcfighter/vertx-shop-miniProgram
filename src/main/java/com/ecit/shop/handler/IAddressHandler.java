@@ -31,10 +31,10 @@ public interface IAddressHandler {
     @Fluent
     IAddressHandler listAddress(String token, Handler<AsyncResult<List<JsonObject>>> handler);
 
-    @Fluent
-    IAddressHandler findDefaultAddress(String token, Handler<AsyncResult<JsonObject>> handler);
-
     /*@Fluent
-    IAddressHandler updateDefaultAddress(String token, long addressId, Handler<AsyncResult<Integer>> handler);*/
+    IAddressHandler findDefaultAddress(String token, Handler<AsyncResult<JsonObject>> handler);*/
+
+    @Fluent
+    IAddressHandler updateDefaultAddress(String token, long addressId, Handler<AsyncResult<Integer>> handler);
 
 }

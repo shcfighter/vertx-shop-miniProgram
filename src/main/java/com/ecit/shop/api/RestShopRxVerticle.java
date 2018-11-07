@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -70,7 +71,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.get("/api/addressDetail/:id").handler(this::addressDetailHandler);       //收货地址详情
         router.delete("/api/delAddress/:id").handler(this::addressDelHandler);      //删除收货地址
         router.get("/api/defaultAddress").handler(this::defaultAddressHandler);       //默认收货地址详情
-        //router.put("/api/updateDefaultAddress/:id").handler(this::updateDefaultAddressHandler);       //修改默认收货地址详情
+        router.put("/api/updateDefaultAddress/:id").handler(this::updateDefaultAddressHandler);       //修改默认收货地址详情
         /**
          * 购物车
          */
@@ -223,13 +224,14 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      * @param context
      */
     private void defaultAddressHandler(RoutingContext context){
-        addressHandler.findDefaultAddress(context.request().getHeader("token"), hander -> {
+        addressHandler.listAddress(context.request().getHeader("token"), hander -> {
             if(hander.failed()){
                 LOGGER.info("获取默认收货地址失败:", hander.cause());
                 this.returnWithFailureMessage(context, "获取默认收货地址失败");
                 return;
             }
-            this.returnWithSuccessMessage(context, "获取默认收货地址成功", hander.result());
+            List<JsonObject> result = hander.result();
+            this.returnWithSuccessMessage(context, "获取默认收货地址成功", (Objects.isNull(result) || result.size() == 0) ? new JsonObject() : result.get(0));
             return;
         });
     }
@@ -238,7 +240,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      * 修改默认收货地址
      * @param context
      */
-    /*private void updateDefaultAddressHandler(RoutingContext context){
+    private void updateDefaultAddressHandler(RoutingContext context){
         addressHandler.updateDefaultAddress(context.request().getHeader("token"), Long.parseLong(context.pathParam("id")), hander -> {
             if(hander.failed()){
                 LOGGER.info("修改默认收货地址失败:", hander.cause());
@@ -248,7 +250,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
             this.returnWithSuccessMessage(context, "修改默认收货地址成功", hander.result());
             return;
         });
-    }*/
+    }
 
     /**
      * 获取banner信息
