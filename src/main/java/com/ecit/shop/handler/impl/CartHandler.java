@@ -14,6 +14,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -114,9 +115,14 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
                 buffer.add("?");
                 condition.add(id);
             });
+            Map<String, Object> map = new HashMap<>();
+            map.put("carts",buffer.stream().collect(Collectors.joining(",")));
             this.execute(condition,
-                    MustacheUtils.mustacheString(CartSql.BATCH_DELETE_CART_SQL, Map.of("carts",buffer.stream().collect(Collectors.joining(",")))))
+                    MustacheUtils.mustacheString(CartSql.BATCH_DELETE_CART_SQL, map))
                     .subscribe(resultFuture::complete, resultFuture::fail);
+            /*this.execute(condition,
+                    MustacheUtils.mustacheString(CartSql.BATCH_DELETE_CART_SQL, Map.of("carts",buffer.stream().collect(Collectors.joining(",")))))
+                    .subscribe(resultFuture::complete, resultFuture::fail);*/
             return resultFuture;
         }).setHandler(handler);
         return this;
