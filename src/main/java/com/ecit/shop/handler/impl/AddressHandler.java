@@ -83,8 +83,9 @@ public class AddressHandler extends JdbcRxRepositoryWrapper implements IAddressH
     public IAddressHandler delAddress(String token, long addressId, Handler<AsyncResult<Integer>> handler) {
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
             Future<JsonObject> addressFuture = Future.future();
-            this.retrieveOne(new JsonArray().add(addressId), AddressSql.SELECT_ADDRESS_BY_ID_SQL).subscribe(addressFuture::complete, addressFuture::fail);
+            this.retrieveOne(new JsonArray().add(addressId).add(userId), AddressSql.SELECT_ADDRESS_BY_ID_SQL).subscribe(addressFuture::complete, addressFuture::fail);
             return addressFuture.compose(address -> {
                 Future<Integer> resultFuture = Future.future();
                 if(Objects.isNull(address) || address.isEmpty()){
@@ -119,6 +120,27 @@ public class AddressHandler extends JdbcRxRepositoryWrapper implements IAddressH
             Future<JsonObject> resultFuture = Future.future();
             this.retrieveOne(new JsonArray().add(userId), AddressSql.SELECT_DEFAULT_ADDRESS_SQL).subscribe(resultFuture::complete, resultFuture::fail);
             return resultFuture;
+        }).setHandler(handler);
+        return this;
+    }
+
+    @Override
+    public IAddressHandler updateDefaultAddress(String token, long addressId, Handler<AsyncResult<Integer>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<JsonObject> addressFuture = Future.future();
+            this.retrieveOne(new JsonArray().add(addressId).add(userId), AddressSql.SELECT_ADDRESS_BY_ID_SQL).subscribe(addressFuture::complete, addressFuture::fail);
+            return addressFuture.compose(address -> {
+                Future<Integer> resultFuture = Future.future();
+                if(Objects.isNull(address) || address.isEmpty()){
+                    resultFuture.complete(0);
+                    return resultFuture;
+                }
+                this.execute(new JsonArray().add(addressId).add(address.getLong("versions")), AddressSql.UPDATE_DEFAULT_ADDRESS_SQL)
+                        .subscribe(resultFuture::complete, resultFuture::fail);
+                return resultFuture;
+            });
         }).setHandler(handler);
         return this;
     }
