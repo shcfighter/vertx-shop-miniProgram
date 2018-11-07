@@ -29,7 +29,12 @@ public interface AddressSql {
     /**
      * 查询收货地址列表
      */
-    String SELECT_ADDRESS_BY_USERID_SQL = "select * from t_address where user_id = ? and is_deleted = 0 order by update_time desc";
+    String SELECT_ADDRESS_BY_USERID_SQL = "select address_id::text, name, province_id, city_id, district_id, address, mobile, code, is_default, versions from t_address where user_id = ? and is_deleted = 0 order by update_time desc";
+
+    /**
+     * 获取默认收货地址
+     */
+    String SELECT_DEFAULT_ADDRESS_SQL = "select address_id::text, name, province_id, city_id, district_id, address, mobile, code, is_default, versions from t_address where user_id = ? and is_deleted = 0 order by update_time desc";
 
 
 }

@@ -110,4 +110,16 @@ public class AddressHandler extends JdbcRxRepositoryWrapper implements IAddressH
         }).setHandler(handler);
         return this;
     }
+
+    @Override
+    public IAddressHandler findDefaultAddress(String token, Handler<AsyncResult<JsonObject>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<JsonObject> resultFuture = Future.future();
+            this.retrieveOne(new JsonArray().add(userId), AddressSql.SELECT_DEFAULT_ADDRESS_SQL).subscribe(resultFuture::complete, resultFuture::fail);
+            return resultFuture;
+        }).setHandler(handler);
+        return this;
+    }
 }
