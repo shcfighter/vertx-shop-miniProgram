@@ -23,6 +23,7 @@
         <slf4j-log4j12-version>1.7.25</slf4j-log4j12-version>
         <commons-lang3.version>3.7</commons-lang3.version>
         <guava-version>27.0-jre</guava-version>
+        <mustache.java.version>0.9.5</mustache.java.version>
         <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     </properties>
 
@@ -140,6 +141,11 @@
             <artifactId>guava</artifactId>
             <version>${guava-version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.spullara.mustache.java</groupId>
+            <artifactId>compiler</artifactId>
+            <version>${mustache.java.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -147,6 +153,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
                 <configuration>
                     <source>${java-version}</source>
                     <target>${java-version}</target>

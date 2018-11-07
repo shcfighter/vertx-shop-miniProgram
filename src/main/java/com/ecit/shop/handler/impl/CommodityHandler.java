@@ -32,7 +32,7 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
     final RxElasticSearchService rxElasticSearchService;
     final Vertx vertx;
     final JsonObject config;
-    
+
     public CommodityHandler(Vertx vertx, JsonObject config) {
         super(vertx, config);
         this.vertx = vertx;
