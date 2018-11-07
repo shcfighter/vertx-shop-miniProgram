@@ -30,9 +30,9 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
     private static final String SHOP_INDICES = "shop_miniprogram";
 
     final RxElasticSearchService rxElasticSearchService;
-
     final Vertx vertx;
     final JsonObject config;
+    
     public CommodityHandler(Vertx vertx, JsonObject config) {
         super(vertx, config);
         this.vertx = vertx;
