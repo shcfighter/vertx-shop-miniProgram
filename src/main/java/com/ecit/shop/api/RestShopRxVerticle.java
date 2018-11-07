@@ -224,14 +224,13 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      * @param context
      */
     private void defaultAddressHandler(RoutingContext context){
-        addressHandler.listAddress(context.request().getHeader("token"), hander -> {
+        addressHandler.findDefaultAddress(context.request().getHeader("token"), hander -> {
             if(hander.failed()){
                 LOGGER.info("获取默认收货地址失败:", hander.cause());
                 this.returnWithFailureMessage(context, "获取默认收货地址失败");
                 return;
             }
-            List<JsonObject> result = hander.result();
-            this.returnWithSuccessMessage(context, "获取默认收货地址成功", (Objects.isNull(result) || result.size() == 0) ? new JsonObject() : result.get(0));
+            this.returnWithSuccessMessage(context, "获取默认收货地址成功", hander.result());
             return;
         });
     }
