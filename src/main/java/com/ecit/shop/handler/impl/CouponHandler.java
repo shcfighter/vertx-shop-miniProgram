@@ -75,7 +75,7 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
                                                        .add(coupon.getLong("category_id"))
                                                        .add(Objects.isNull(coupon.getString("category_name")) ? "" : coupon.getString("category_name"))
                                                        .add(System.currentTimeMillis())
-                                                       .add(System.currentTimeMillis() + coupon.getInteger("expiry_date") * 24 * 60 * 60 * 1000)
+                                                       .add(System.currentTimeMillis() + coupon.getInteger("expiry_date") * 24 * 60 * 60 * 1000L)
                                                        .add(userId).add(coupon.getString("min_user_amount")).add(coupon.getInteger("expiry_date"))))
                                        .flatMap(updateResult -> conn.rxUpdateWithParams(CouponSql.UPDATE_COUPON_NUM_SQL,
                                                new JsonArray().add(coupon.getLong("coupon_id"))))

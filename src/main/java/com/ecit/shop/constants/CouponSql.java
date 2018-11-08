@@ -18,7 +18,7 @@ public interface CouponSql {
     /**
      * 修改代金券可用数量
      */
-    String UPDATE_COUPON_NUM_SQL = "update t_coupon set grant_num1 = (grant_num - 1), update_time = now(), versions = (versions + 1) where coupon_id = ? and is_deleted = 0";
+    String UPDATE_COUPON_NUM_SQL = "update t_coupon set grant_num = (grant_num - 1), update_time = now(), versions = (versions + 1) where coupon_id = ? and is_deleted = 0";
 
     /**
      * 根据id查询代金券详情
@@ -33,6 +33,6 @@ public interface CouponSql {
     /**
      * 领取代金券
      */
-    String INSERT_COUPON_DETAIL_SQL = "insert into t_coupon_detail(coupon_detail_id, coupon_id, coupon_name, coupon_type, coupon_amount, category_id, category_name, begin_time, end_time, user_id, min_user_amount, expiry_date, create_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())";
+    String INSERT_COUPON_DETAIL_SQL = "insert into t_coupon_detail(coupon_detail_id, coupon_id, coupon_name, coupon_type, coupon_amount, category_id, category_name, begin_time, end_time, user_id, min_user_amount, expiry_date, create_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())";
 
 }
