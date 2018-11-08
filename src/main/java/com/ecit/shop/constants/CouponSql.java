@@ -33,6 +33,6 @@ public interface CouponSql {
     /**
      * 领取代金券
      */
-    String INSERT_COUPON_DETAIL_SQL = "insert into t_coupon_detail(coupon_detail_id, coupon_id, coupon_name, coupon_type, coupon_amount, category_id, category_name, begin_time, end_time, user_id, min_user_amount, expiry_date, create_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())";
+    String INSERT_COUPON_DETAIL_SQL = "insert into t_coupon_detail(coupon_detail_id, coupon_id, coupon_name, coupon_type, coupon_amount, category_id, category_name, begin_time, end_time, user_id, min_user_amount, expiry_date, create_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())";
 
 }
