@@ -31,6 +31,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
     private IBannerHandler bannerHandler;
     private ICommodityHandler commodityHandler;
     private ICartHandler cartHandler;
+    private ICouponHandler couponHandler;
 
     @Override
     public void start() throws Exception {
@@ -41,6 +42,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         this.bannerHandler = new BannerHandler(vertx, this.config());
         this.commodityHandler = new CommodityHandler(vertx, this.config());
         this.cartHandler = new CartHandler(vertx, this.config());
+        this.couponHandler = new CouponHandler(vertx, this.config());
 
         final Router router = Router.router(vertx);
         // cookie and session handler
@@ -58,6 +60,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.get("/api/commodity/detail/:id").handler(this::findCommodityFromESByIdHandler);     //搜索商品详情信息
         router.post("/api/commodity/specifition/price/:id").handler(this::findCommoditySpecifitionPriceHandler);     //查询商品价格
         router.post("/api/commodity/price/:id").handler(this::findCommodityPriceHandler);     //查询商品价格
+        router.get("/api/coupons").handler(this::couponHandler);     //代金券信息列表
 
         router.getDelegate().route().handler(ShopUserSessionHandler.create(vertx.getDelegate(), this.config()));
 
@@ -460,6 +463,22 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 return;
             }
             this.returnWithSuccessMessage(context, "批量删除购物车商品成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 获取代金券信息列表
+     * @param context
+     */
+    private void couponHandler(RoutingContext context){
+        couponHandler.findCouponList(hander -> {
+            if(hander.failed()){
+                LOGGER.info("获取代金券信息列表失败:", hander.cause());
+                this.returnWithFailureMessage(context, "获取代金券信息列表失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "获取代金券信息列表成功", hander.result());
             return;
         });
     }

@@ -7,14 +7,16 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
+import java.util.List;
+
 /**
  * Created by shwang on 2018/2/2.
  */
 @ProxyGen
 @VertxGen
-public interface IOrderHandler {
+public interface ICouponHandler {
 
     @Fluent
-    IOrderHandler insertOrder(String token, JsonObject params, Handler<AsyncResult<Integer>> handler);
+    ICouponHandler findCouponList(Handler<AsyncResult<List<JsonObject>>> handler);
 
 }
