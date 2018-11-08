@@ -75,6 +75,8 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
                                                     .add(userId).add(coupon.getString("min_user_amount")).add(coupon.getInteger("expiry_date"))))
                                     .flatMap(updateResult -> conn.rxUpdateWithParams(CouponSql.UPDATE_COUPON_NUM_SQL,
                                             new JsonArray().add(coupon.getLong("coupon_id"))))
+                                    // commit if all succeeded
+                                    .flatMap(updateResult -> conn.rxCommit().toSingleDefault(true).map(commit -> updateResult))
                                     // Rollback if any failed with exception propagation
                                     .onErrorResumeNext(ex -> conn.rxRollback()
                                             .toSingleDefault(true)
