@@ -507,7 +507,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      * 可用代金券列表
      * @param context
      */
-        private void q(RoutingContext context){
+        private void findCouponHandler(RoutingContext context){
         couponHandler.findCoupon(context.request().getHeader("token"), hander -> {
             if(hander.failed()){
                 LOGGER.info("获取可用代金券列表失败:", hander.cause());
