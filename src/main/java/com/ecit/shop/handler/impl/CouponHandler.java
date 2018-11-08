@@ -93,7 +93,6 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
                                        .rxSetAutoCommit(false)
                                        // Switch from Completable to default Single value
                                        .toSingleDefault(false)
-                                       // Create table
                                        .flatMap(autoCommit -> conn.rxUpdateWithParams(CouponSql.INSERT_COUPON_DETAIL_SQL,
                                                new JsonArray().add(IdBuilder.getUniqueId()).add(coupon.getLong("coupon_id")).add(coupon.getString("coupon_name"))
                                                        .add(coupon.getInteger("coupon_type")).add(coupon.getString("coupon_amount"))
@@ -102,7 +101,6 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
                                                        .add(System.currentTimeMillis())
                                                        .add(System.currentTimeMillis() + coupon.getInteger("expiry_date") * 24 * 60 * 60 * 1000)
                                                        .add(userId).add(coupon.getString("min_user_amount")).add(coupon.getInteger("expiry_date"))))
-                                       // Insert colors
                                        .flatMap(updateResult -> conn.rxUpdateWithParams(CouponSql.UPDATE_COUPON_NUM_SQL,
                                                new JsonArray().add(coupon.getLong("coupon_id"))))
                                        // commit if all succeeded

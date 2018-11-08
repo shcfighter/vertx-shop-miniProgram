@@ -18,7 +18,7 @@ public interface CouponSql {
     /**
      * 修改代金券可用数量
      */
-    String UPDATE_COUPON_NUM_SQL = "update t_coupon set grant_num = (grant_num - 1), update_time = now(), versions = (versions + 1) where coupon_id = ? and is_deleted = 0";
+    String UPDATE_COUPON_NUM_SQL = "update t_coupon set grant_num1 = (grant_num - 1), update_time = now(), versions = (versions + 1) where coupon_id = ? and is_deleted = 0";
 
     /**
      * 根据id查询代金券详情
