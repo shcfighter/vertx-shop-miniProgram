@@ -8,7 +8,7 @@ public interface CouponSql {
     /**
      * 获取代金券列表
      */
-    String SELECT_COUPON_SQL = "select coupon_name, coupon_type, coupon_amount::numeric, min_user_amount::numeric, expiry_date, grant_num from t_coupon where grant_num > 0 and begin_time <= ? and end_time >= ? and is_deleted = 0 order by sort";
+    String SELECT_COUPON_SQL = "select coupon_id::text, coupon_name, coupon_type, coupon_amount::numeric, min_user_amount::numeric, expiry_date, grant_num from t_coupon where grant_num > 0 and begin_time <= ? and end_time >= ? and is_deleted = 0 order by sort";
 
     /**
      * 通过id查询代金券
