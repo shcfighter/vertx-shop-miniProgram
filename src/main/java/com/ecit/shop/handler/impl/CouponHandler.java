@@ -116,6 +116,7 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
                            ).subscribe(future::complete, future::fail);
                    System.out.println("111111111111111111111111111111111111111111111111111");
                     return future.compose(result -> {
+                        System.out.println(result.toJson());
                    System.out.println("2222222222222222222222222222222222222222222222222222");
                        if(result.getUpdated() > 0){
                    System.out.println("333333333333333333333333333333333333333333333333");
