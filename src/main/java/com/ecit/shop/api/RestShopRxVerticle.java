@@ -61,7 +61,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.post("/api/commodity/specifition/price/:id").handler(this::findCommoditySpecifitionPriceHandler);     //查询商品价格
         router.post("/api/commodity/price/:id").handler(this::findCommodityPriceHandler);     //查询商品价格
         router.get("/api/coupons").handler(this::couponHandler);     //代金券信息列表
-        router.get("/api/coupon/fetch/:id").handler(this::fetchCouponHandler);     //代金券信息列表
+        router.put("/api/coupon/fetch/:id").handler(this::fetchCouponHandler);     //代金券信息列表
 
         router.getDelegate().route().handler(ShopUserSessionHandler.create(vertx.getDelegate(), this.config()));
 

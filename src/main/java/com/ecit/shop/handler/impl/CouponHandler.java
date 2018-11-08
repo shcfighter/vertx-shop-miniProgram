@@ -47,16 +47,19 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
             this.retrieveOne(new JsonArray().add(couponId), CouponSql.SELECT_COUPON_BY_ID_SQL).subscribe(couponFuture::complete, couponFuture::fail);
             return couponFuture.compose(coupon -> {
                if(JsonUtils.isNull(coupon)){
+                   //代金券不存在
                    return Future.succeededFuture(0);
                }
                if(coupon.getLong("begin_time") > System.currentTimeMillis() || coupon.getLong("end_time") < System.currentTimeMillis()){
+                   //超过领取时间按
                    return Future.succeededFuture(2);
                }
                Future<JsonObject> detailFuture = Future.future();
-               this.retrieveOne(new JsonArray(), CouponSql.SELECT_COUPON_DETAIL_USERID_COUPONID_SQL).subscribe(detailFuture::complete, detailFuture::fail);
+               this.retrieveOne(new JsonArray().add(userId).add(coupon.getLong("coupon_id")), CouponSql.SELECT_COUPON_DETAIL_USERID_COUPONID_SQL).subscribe(detailFuture::complete, detailFuture::fail);
                return detailFuture.compose(detail -> {
                     if(detail.getInteger("row_num") > 0){
-                        return Future.succeededFuture(0);
+                        //已经领取过
+                        return Future.succeededFuture(3);
                     }
                     Future<UpdateResult> future = Future.future();
                     postgreSQLClient.rxGetConnection().flatMap(conn ->
@@ -80,8 +83,10 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
                     ).subscribe(future::complete, future::fail);
                     return future.compose(result -> {
                        if(result.getUpdated() > 0){
+                           //领取成功
                            return Future.succeededFuture(1);
                        }
+                       //领取失败
                        return Future.succeededFuture(4);
                     });
                 });
