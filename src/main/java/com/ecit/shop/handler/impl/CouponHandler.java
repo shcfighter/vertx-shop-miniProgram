@@ -62,31 +62,8 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
                         //已经领取过
                         return Future.succeededFuture(3);
                     }
-                    Future<UpdateResult> future = Future.future();
-                    /*postgreSQLClient.rxGetConnection().flatMap(conn ->
-                            conn.rxSetAutoCommit(false).toSingleDefault(false)
-                                    .flatMap(autoCommit -> conn.rxUpdateWithParams(CouponSql.INSERT_COUPON_DETAIL_SQL,
-                                            new JsonArray().add(IdBuilder.getUniqueId()).add(coupon.getLong("coupon_id")).add(coupon.getString("coupon_name"))
-                                                    .add(coupon.getInteger("coupon_type")).add(coupon.getString("coupon_amount"))
-                                                    .add(coupon.getLong("category_id"))
-                                                    .add(Objects.isNull(coupon.getString("category_name")) ? "" : coupon.getString("category_name"))
-                                                    .add(System.currentTimeMillis())
-                                                    .add(System.currentTimeMillis() + coupon.getInteger("expiry_date") * 24 * 60 * 60 * 1000)
-                                                    .add(userId).add(coupon.getString("min_user_amount")).add(coupon.getInteger("expiry_date"))))
-                                    .flatMap(updateResult -> conn.rxUpdateWithParams(CouponSql.UPDATE_COUPON_NUM_SQL,
-                                            new JsonArray().add(coupon.getLong("coupon_id"))))
-                                    // commit if all succeeded
-                                    .flatMap(updateResult -> conn.rxCommit().toSingleDefault(true).map(commit -> updateResult))
-                                    // Rollback if any failed with exception propagation
-                                    .onErrorResumeNext(ex -> conn.rxRollback()
-                                            .toSingleDefault(true)
-                                            .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
-                                            .flatMap(ignore -> Single.error(ex))
-                                    )
-                                    // close the connection regardless succeeded or failed
-                                    .doAfterTerminate(conn::close)
-                    ).subscribe(future::complete, future::fail);*/
-                   postgreSQLClient .rxGetConnection()
+                    Future<Integer> future = Future.future();
+                    postgreSQLClient .rxGetConnection()
                            .flatMap(conn ->
                                    conn
                                        // Disable auto commit to handle transaction manually
@@ -113,20 +90,21 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
                                        )
                                        // close the connection regardless succeeded or failed
                                        .doAfterTerminate(conn::close)
-                           ).subscribe(future::complete, future::fail);
-                   System.out.println("111111111111111111111111111111111111111111111111111");
-                    return future.compose(result -> {
-                        System.out.println(result.toJson());
-                   System.out.println("2222222222222222222222222222222222222222222222222222");
-                       if(result.getUpdated() > 0){
-                   System.out.println("333333333333333333333333333333333333333333333333");
-                           //领取成功
-                           return Future.succeededFuture(1);
-                       }
-                   System.out.println("444444444444444444444444444444444444444444444");
-                       //领取失败
-                       return Future.succeededFuture(4);
-                    });
+                           ).subscribe(result -> {
+                                   System.out.println(result.toJson());
+                                   System.out.println("2222222222222222222222222222222222222222222222222222");
+                                   if(result.getUpdated() > 0){
+                                       System.out.println("333333333333333333333333333333333333333333333333");
+                                       //领取成功
+                                       future.complete(1);
+                                       return ;
+                                   }
+                                   System.out.println("444444444444444444444444444444444444444444444");
+                                   //领取失败
+                                   future.complete(4);
+                                   return ;
+                               }, future::fail);
+                   return future;
                 });
             });
         }).setHandler(handler);
