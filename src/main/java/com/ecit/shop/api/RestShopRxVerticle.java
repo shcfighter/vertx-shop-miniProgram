@@ -60,7 +60,6 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.post("/api/commodity/specifition/price/:id").handler(this::findCommoditySpecifitionPriceHandler);     //查询商品价格
         router.post("/api/commodity/price/:id").handler(this::findCommodityPriceHandler);     //查询商品价格
         router.get("/api/coupons").handler(this::couponHandler);     //代金券信息列表
-        router.put("/api/coupon/fetch/:id").handler(this::fetchCouponHandler);     //代金券信息列表
 
         router.getDelegate().route().handler(ShopUserSessionHandler.create(vertx.getDelegate(), this.config()));
 
@@ -83,7 +82,11 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.get("/api/findCart").handler(this::findCartHandler);        //购物车列表
         router.delete("/api/delCart/:id").handler(this::cartDelHandler);      //删除收货地址
         router.delete("/api/delBatchCart").handler(this::cartDelBatchHandler);      //批量删除收货地址
-
+        /**
+         * 代金券
+         */
+        router.put("/api/coupon/fetch/:id").handler(this::fetchCouponHandler);     //代金券信息列表
+        router.get("/api/findCoupon").handler(this::findCouponHandler);     //可用代金券信息列表
 
 
         //全局异常处理
@@ -496,6 +499,22 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 return;
             }
             this.returnWithSuccessMessage(context, "领取代金券成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 可用代金券列表
+     * @param context
+     */
+        private void q(RoutingContext context){
+        couponHandler.findCoupon(context.request().getHeader("token"), hander -> {
+            if(hander.failed()){
+                LOGGER.info("获取可用代金券列表失败:", hander.cause());
+                this.returnWithFailureMessage(context, "获取可用代金券列表失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "获取可用代金券列表成功", hander.result());
             return;
         });
     }

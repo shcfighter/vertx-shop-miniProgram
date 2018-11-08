@@ -76,7 +76,7 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
                                                        .add(Objects.isNull(coupon.getString("category_name")) ? "" : coupon.getString("category_name"))
                                                        .add(System.currentTimeMillis())
                                                        .add(System.currentTimeMillis() + coupon.getInteger("expiry_date") * 24 * 60 * 60 * 1000L)
-                                                       .add(userId).add(coupon.getString("min_user_amount")).add(coupon.getInteger("expiry_date"))))
+                                                       .add(userId).add(coupon.getString("min_use_amount")).add(coupon.getInteger("expiry_date"))))
                                        .flatMap(updateResult -> conn.rxUpdateWithParams(CouponSql.UPDATE_COUPON_NUM_SQL,
                                                new JsonArray().add(coupon.getLong("coupon_id"))))
                                        // commit if all succeeded
@@ -90,15 +90,11 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
                                        // close the connection regardless succeeded or failed
                                        .doAfterTerminate(conn::close)
                            ).subscribe(result -> {
-                                   System.out.println(result.toJson());
-                                   System.out.println("2222222222222222222222222222222222222222222222222222");
                                    if(result.getUpdated() > 0){
-                                       System.out.println("333333333333333333333333333333333333333333333333");
                                        //领取成功
                                        future.complete(1);
                                        return ;
                                    }
-                                   System.out.println("444444444444444444444444444444444444444444444");
                                    //领取失败
                                    future.complete(4);
                                    return ;
@@ -106,6 +102,25 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
                    return future;
                 });
             });
+        }).setHandler(handler);
+        return this;
+    }
+
+    /**
+     * 可用代金券列表
+     * @param token
+     * @param handler
+     * @return
+     */
+    @Override
+    public ICouponHandler findCoupon(String token, Handler<AsyncResult<List<JsonObject>>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<List<JsonObject>> future = Future.future();
+            this.retrieveMany(new JsonArray().add(userId).add(System.currentTimeMillis()).add(System.currentTimeMillis()), CouponSql.SELECT_COUPON_DETAIL_USERID_SQL)
+                    .subscribe(future::complete, future::fail);
+            return future;
         }).setHandler(handler);
         return this;
     }

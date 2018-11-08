@@ -22,4 +22,7 @@ public interface ICouponHandler {
     @Fluent
     ICouponHandler fetchCoupon(String token, long couponId, Handler<AsyncResult<Integer>> handler);
 
+    @Fluent
+    ICouponHandler findCoupon(String token, Handler<AsyncResult<List<JsonObject>>> handler);
+
 }
