@@ -12,7 +12,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.core.Vertx;
 
 import java.util.List;
@@ -110,4 +109,6 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
         }).setHandler(handler);
         return this;
     }
+
+
 }
