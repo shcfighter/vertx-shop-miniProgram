@@ -109,6 +109,7 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
 
     @Override
     public ICommodityHandler findCommoditySpecifitionPrice(long commodityId, String specifitionName, Handler<AsyncResult<JsonObject>> handler) {
+        System.out.println("specifitionName: " + specifitionName);
         Future<JsonObject> future = Future.future();
         this.retrieveOne(new JsonArray().add(commodityId).add(specifitionName), CommoditySql.COMMODITY_PRICE_SQL).subscribe(future::complete, future::fail);
         future.setHandler(handler);
