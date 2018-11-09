@@ -37,6 +37,11 @@ public interface AddressSql {
     String SELECT_DEFAULT_ADDRESS_SQL = "select address_id::text, name, province_id, city_id, district_id, address, mobile, code, is_default, versions from t_address where user_id = ? and is_deleted = 0 order by update_time desc";
 
     /**
+     * 更新收货地址为非默认
+     */
+    String UPDATE_UNDEFAULT_ADDRESS_SQL = "update t_address set is_default = 0, update_time = now() where user_id = ? and is_deleted = 0";
+
+    /**
      * 设置默认收货地址
      */
     String UPDATE_DEFAULT_ADDRESS_SQL = "update t_address set is_default = 1, update_time = now(), versions = (versions + 1) where address_id = ? and versions = ? and is_deleted = 0";

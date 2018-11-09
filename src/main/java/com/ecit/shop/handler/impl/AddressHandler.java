@@ -45,13 +45,17 @@ public class AddressHandler extends JdbcRxRepositoryWrapper implements IAddressH
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
             final long userId = session.getLong("user_id");
-            Future<Integer> resultFuture = Future.future();
-            this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(params.getString("name")).add(params.getInteger("province_id"))
-                    .add(params.getInteger("city_id")).add(Objects.isNull(params.getInteger("district_id")) ? 0 : params.getInteger("district_id"))
-                    .add(params.getString("address")).add(params.getString("mobile")).add(params.getString("code"))
-                    .add(params.getInteger("is_default")), AddressSql.INSERT_ADDRESS_SQL).
-                    subscribe(resultFuture::complete, resultFuture::fail);
-            return resultFuture;
+            Future<Integer> unDefaultFuture = Future.future();
+            this.execute(new JsonArray().add(userId), AddressSql.UPDATE_UNDEFAULT_ADDRESS_SQL).subscribe(unDefaultFuture::complete, unDefaultFuture::fail);
+            return unDefaultFuture.compose(res -> {
+                Future<Integer> resultFuture = Future.future();
+                this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(params.getString("name")).add(params.getInteger("province_id"))
+                        .add(params.getInteger("city_id")).add(Objects.isNull(params.getInteger("district_id")) ? 0 : params.getInteger("district_id"))
+                        .add(params.getString("address")).add(params.getString("mobile")).add(params.getString("code"))
+                        .add(params.getInteger("is_default")), AddressSql.INSERT_ADDRESS_SQL).
+                        subscribe(resultFuture::complete, resultFuture::fail);
+                return resultFuture;
+            });
         }).setHandler(handler);
         return this;
     }
@@ -137,9 +141,13 @@ public class AddressHandler extends JdbcRxRepositoryWrapper implements IAddressH
                     resultFuture.complete(0);
                     return resultFuture;
                 }
-                this.execute(new JsonArray().add(addressId).add(address.getLong("versions")), AddressSql.UPDATE_DEFAULT_ADDRESS_SQL)
-                        .subscribe(resultFuture::complete, resultFuture::fail);
-                return resultFuture;
+                Future unDefaultFuture = Future.future();
+                this.execute(new JsonArray().add(userId), AddressSql.UPDATE_UNDEFAULT_ADDRESS_SQL).subscribe(unDefaultFuture::complete, unDefaultFuture::fail);
+                return unDefaultFuture.compose(res -> {
+                    this.execute(new JsonArray().add(addressId).add(address.getLong("versions")), AddressSql.UPDATE_DEFAULT_ADDRESS_SQL)
+                            .subscribe(resultFuture::complete, resultFuture::fail);
+                    return resultFuture;
+                });
             });
         }).setHandler(handler);
         return this;
