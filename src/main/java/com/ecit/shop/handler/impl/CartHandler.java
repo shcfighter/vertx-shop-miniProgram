@@ -40,8 +40,8 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
                 if(Objects.isNull(cart) || cart.isEmpty()){
                     this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(params.getLong("commodity_id"))
                             .add(params.getString("commodity_name")).add(params.getInteger("num")).add(params.getString("price"))
-                            .add(params.getString("image_url")).add(params.getString("specifition_name")), CartSql.INSERT_CART_SQL).
-                            subscribe(resultFuture::complete, resultFuture::fail);
+                            .add(params.getString("image_url")).add(params.getString("specifition_name")).add(params.getString("freight_price")),
+                            CartSql.INSERT_CART_SQL).subscribe(resultFuture::complete, resultFuture::fail);
                 }else{
                     this.execute(new JsonArray().add(params.getInteger("num")).add(params.getString("price")).add(userId)
                             .add(params.getLong("commodity_id")).add(params.getString("specifition_name"))

@@ -8,12 +8,12 @@ public interface CartSql {
     /**
      * 新增购物车信息
      */
-    String INSERT_CART_SQL = "insert into t_cart(cart_id, user_id, commodity_id, commodity_name, num, price, image_url, specifition_name, is_deleted, create_time, versions) values(?, ?, ?, ?, ?, ?, ?, ?, 0, now(), 0)";
+    String INSERT_CART_SQL = "insert into t_cart(cart_id, user_id, commodity_id, commodity_name, num, price, image_url, specifition_name, freight_price, is_deleted, create_time, versions) values(?, ?, ?, ?, ?, ?, ?, ?, ?, 0, now(), 0)";
 
     /**
      * 查询购物车列表
      */
-    String SELECT_CART_SQL = "select cart_id::text, user_id, commodity_id, commodity_name, num, price::numeric, image_url, specifition_name, create_time, versions from t_cart where user_id = ? and is_deleted = 0 order by create_time desc";
+    String SELECT_CART_SQL = "select cart_id::text, user_id, commodity_id, commodity_name, num, price::numeric, image_url, specifition_name, freight_price::numeric create_time, versions from t_cart where user_id = ? and is_deleted = 0 order by create_time desc";
 
     /**
      * 查询商品数量
