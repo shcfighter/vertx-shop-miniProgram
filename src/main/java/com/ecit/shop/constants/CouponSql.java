@@ -38,6 +38,6 @@ public interface CouponSql {
     /**
      * 根据用户id查询可用代金券
      */
-    String SELECT_COUPON_DETAIL_USERID_SQL = "select coupon_detail_id:text, coupon_name, coupon_amount::numeric, begin_time, end_time, min_use_amount::numeric, versions from t_coupon_detail where user_id = ? and begin_time <= ? and end_time >= ? and is_deleted = 0 and is_use = 0 ";
+    String SELECT_COUPON_DETAIL_USERID_SQL = "select coupon_detail_id::text, coupon_name, coupon_amount::numeric, begin_time, end_time, min_use_amount::numeric, versions from t_coupon_detail where user_id = ? and begin_time <= ? and end_time >= ? and is_deleted = 0 and is_use = 0 ";
 
 }
