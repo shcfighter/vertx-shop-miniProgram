@@ -1,9 +1,13 @@
 package com.ecit.common.db;
 
 import com.ecit.common.constants.Constants;
+import com.ecit.shop.constants.CouponSql;
 import com.ecit.shop.constants.UserSql;
 import io.reactivex.Single;
+import io.reactivex.exceptions.CompositeException;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -16,8 +20,10 @@ import io.vertx.reactivex.redis.RedisClient;
 import io.vertx.redis.RedisOptions;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Helper and wrapper class for JDBC repository services.
@@ -99,6 +105,48 @@ public class JdbcRxRepositoryWrapper {
     return this.getConnection()
             .flatMap(conn -> conn.rxUpdate(sql).map(UpdateResult::getUpdated)
                     .doAfterTerminate(conn::close));
+  }
+
+  protected Single<UpdateResult> executeTransaction(List<JsonObject> arrays){
+      return this.getConnection()
+              .flatMap(conn -> {
+                  Single result = conn
+                          // Disable auto commit to handle transaction manually
+                          .rxSetAutoCommit(false)
+                          // Switch from Completable to default Single value
+                          .toSingleDefault(false);
+                  for (JsonObject json : arrays) {
+                      if (!json.containsKey("type")) {
+                          continue;
+                      }
+                      switch (json.getString("type")) {
+                          case "execute": {
+                              result = result.flatMap(updateResult -> conn.rxExecute(json.getString("sql")));
+                          }
+                          case "update": {
+                              result = result.flatMap(updateResult -> conn.rxUpdateWithParams(json.getString("sql"),
+                                      json.getJsonArray("params")));
+                          }
+                          default: {
+                          }
+                      }
+                  }
+                  // commit if all succeeded
+                  Single<UpdateResult> resultSingle = result.flatMap(updateResult -> conn.rxCommit().toSingleDefault(true).map(commit -> updateResult));
+                  // Rollback if any failed with exception propagation
+                  resultSingle = resultSingle.onErrorResumeNext(ex -> conn.rxRollback()
+                          .toSingleDefault(true)
+                          .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
+                          .flatMap(ignore -> Single.error(ex))
+                  )
+                  // close the connection regardless succeeded or failed
+                  .doAfterTerminate(conn::close);
+                  return resultSingle;
+              });
+  }
+
+  protected Single executeTransaction(JsonObject... arrays){
+      return this.executeTransaction(Arrays.asList(arrays));
   }
 
   protected Single<SQLConnection> getConnection() {

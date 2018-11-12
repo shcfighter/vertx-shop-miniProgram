@@ -6,6 +6,7 @@ import com.ecit.shop.api.RestShopRxVerticle;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.GroupConfig;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Future;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -19,8 +20,8 @@ import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 public class ShopVerticle extends BaseMicroserviceRxVerticle{
 
     @Override
-    public void start() throws Exception {
-        super.start();
+    public void start(Future<Void> startFuture) throws Exception {
+        super.start(startFuture);
         vertx.getDelegate().deployVerticle(RestShopRxVerticle.class, new DeploymentOptions().setConfig(this.config()).setInstances(this.config().getInteger("instances", 1)));
         vertx.getDelegate().deployVerticle(ElasticSearchServiceVerticle.class, new DeploymentOptions().setConfig(this.config()).setInstances(this.config().getInteger("instances", 1)));
     }
@@ -55,7 +56,7 @@ public class ShopVerticle extends BaseMicroserviceRxVerticle{
                         )
                         .put("address", "eb.elasticsearch")
                         .put("transportAddresses", new JsonArray().add(new JsonObject()
-                                .put("hostname", "111.231.132.168")
+                                .put("hostname", "localhost")
                                 .put("port", 9300)))
                         .put("cluster_name", "vertx_shop")
                         .put("client_transport_sniff", false)

@@ -19,7 +19,7 @@ public interface AddressSql {
     /**
      * 查询收货地址信息
      */
-    String SELECT_ADDRESS_BY_ID_SQL = "select address_id::text, name, province_id, city_id, district_id, address, mobile, code, is_default, versions from t_address where address_id = ? and user_id = ? and is_deleted = 0";
+    String SELECT_ADDRESS_BY_ID_SQL = "select address_id::text, name, province_id, city_id, district_id, country_id, address, mobile, code, is_default, versions from t_address where address_id = ? and user_id = ? and is_deleted = 0";
 
     /**
      * 逻辑删除收货地址

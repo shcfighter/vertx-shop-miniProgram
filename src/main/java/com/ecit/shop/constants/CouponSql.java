@@ -23,7 +23,7 @@ public interface CouponSql {
     /**
      * 根据id查询代金券详情
      */
-    String SELECT_COUPON_DETAIL_BY_ID_SQL = "select coupon_detail_id::text, coupon_name, coupon_type, coupon_amount::numeric, category_id::text, begin_time, end_time, user_id, min_use_amount, expiry_date, is_use from t_coupon_detail where user_id = ? and coupon_detail_id = ? and is_deleted = 0";
+    String SELECT_COUPON_DETAIL_BY_ID_SQL = "select coupon_detail_id::text, coupon_name, coupon_type, coupon_amount::numeric, category_id::text, begin_time, end_time, user_id, min_use_amount, expiry_date, is_use, versions from t_coupon_detail where user_id = ? and coupon_detail_id = ? and is_deleted = 0";
 
     /**
      * 根据用户id、代金券id查询是否领取
@@ -40,4 +40,8 @@ public interface CouponSql {
      */
     String SELECT_COUPON_DETAIL_USERID_SQL = "select coupon_detail_id::text, coupon_name, coupon_amount::numeric, begin_time, end_time, min_use_amount::numeric, versions from t_coupon_detail where user_id = ? and begin_time <= ? and end_time >= ? and is_deleted = 0 and is_use = 0 ";
 
+    /**
+     * 使用代金券
+     */
+    String UPDATE_COUPON_USER_SQL = "update t_coupon_detail set is_use = 1, versions = (versions + 1), update_time = now() where coupon_detail_id = ? and user_id = ? and is_use = 0 and is_deleted = 0";
 }

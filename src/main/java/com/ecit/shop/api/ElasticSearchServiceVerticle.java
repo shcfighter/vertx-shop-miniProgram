@@ -22,6 +22,7 @@ import com.hubrick.vertx.elasticsearch.impl.DefaultElasticSearchService;
 import com.hubrick.vertx.elasticsearch.impl.DefaultTransportClientFactory;
 import com.hubrick.vertx.elasticsearch.impl.JsonElasticSearchConfigurator;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceBinder;
@@ -42,8 +43,8 @@ public class ElasticSearchServiceVerticle extends AbstractVerticle {
     public ElasticSearchServiceVerticle() {}
 
     @Override
-    public void start() throws Exception {
-
+    public void start(Future<Void> startFuture) throws Exception {
+        super.start(startFuture);
         // workaround for problem between ES netty and vertx (both wanting to set the same value)
         System.setProperty("es.set.netty.runtime.available.processors", "false");
         this.service = new DefaultElasticSearchService(new DefaultTransportClientFactory(), new JsonElasticSearchConfigurator(this.config()));

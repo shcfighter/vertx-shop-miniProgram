@@ -6,6 +6,7 @@ import com.ecit.shop.handler.*;
 import com.ecit.shop.handler.impl.*;
 import com.hubrick.vertx.elasticsearch.model.Hits;
 import com.hubrick.vertx.elasticsearch.model.SearchResponse;
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.Router;
@@ -31,17 +32,18 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
     private ICommodityHandler commodityHandler;
     private ICartHandler cartHandler;
     private ICouponHandler couponHandler;
+    private IOrderHandler orderHandler;
 
     @Override
-    public void start() throws Exception {
-        super.start();
-
+    public void start(Future<Void> startFuture) throws Exception {
+        super.start(startFuture);
         this.userHandler = new UserHandler(vertx, this.config());
         this.addressHandler = new AddressHandler(vertx, this.config());
         this.bannerHandler = new BannerHandler(vertx, this.config());
         this.commodityHandler = new CommodityHandler(vertx, this.config());
         this.cartHandler = new CartHandler(vertx, this.config());
         this.couponHandler = new CouponHandler(vertx, this.config());
+        this.orderHandler = new OrderHandler(vertx, this.config());
 
         final Router router = Router.router(vertx);
         // cookie and session handler
@@ -87,6 +89,11 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
          */
         router.put("/api/coupon/fetch/:id").handler(this::fetchCouponHandler);     //代金券信息列表
         router.get("/api/findCoupon").handler(this::findCouponHandler);     //可用代金券信息列表
+
+        /**
+         * 订单
+         */
+        router.put("/api/order/insert").handler(this::insertOrderHandler);     //订单
 
 
         //全局异常处理
@@ -507,7 +514,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      * 可用代金券列表
      * @param context
      */
-        private void findCouponHandler(RoutingContext context){
+    private void findCouponHandler(RoutingContext context){
         couponHandler.findCoupon(context.request().getHeader("token"), hander -> {
             if(hander.failed()){
                 LOGGER.info("获取可用代金券列表失败:", hander.cause());
@@ -515,6 +522,22 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 return;
             }
             this.returnWithSuccessMessage(context, "获取可用代金券列表成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 下单
+     * @param context
+     */
+    private void insertOrderHandler(RoutingContext context){
+        orderHandler.insertOrder(context.request().getHeader("token"), context.getBodyAsJson(), hander -> {
+            if(hander.failed()){
+                LOGGER.info("下单失败:", hander.cause());
+                this.returnWithFailureMessage(context, "下单失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "下单成功", hander.result());
             return;
         });
     }

@@ -34,5 +34,4 @@ public interface CartSql {
      * 批量删除购物车记录
      */
     String BATCH_DELETE_CART_SQL = "update t_cart set is_deleted = 1, versions = (versions + 1), update_time = now() where user_id = ? and cart_id in({{carts}}) and is_deleted = 0";
-
 }

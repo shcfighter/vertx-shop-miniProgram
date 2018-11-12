@@ -120,9 +120,6 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
             this.execute(condition,
                     MustacheUtils.mustacheString(CartSql.BATCH_DELETE_CART_SQL, map))
                     .subscribe(resultFuture::complete, resultFuture::fail);
-            /*this.execute(condition,
-                    MustacheUtils.mustacheString(CartSql.BATCH_DELETE_CART_SQL, Map.of("carts",buffer.stream().collect(Collectors.joining(",")))))
-                    .subscribe(resultFuture::complete, resultFuture::fail);*/
             return resultFuture;
         }).setHandler(handler);
         return this;
