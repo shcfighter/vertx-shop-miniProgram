@@ -4,10 +4,8 @@ import com.ecit.common.IdBuilder;
 import com.ecit.common.db.JdbcRxRepositoryWrapper;
 import com.ecit.common.enums.JdbcEnum;
 import com.ecit.common.utils.JsonUtils;
-import com.ecit.shop.constants.AddressSql;
-import com.ecit.shop.constants.CommoditySql;
-import com.ecit.shop.constants.CouponSql;
-import com.ecit.shop.constants.OrderSql;
+import com.ecit.common.utils.MustacheUtils;
+import com.ecit.shop.constants.*;
 import com.ecit.shop.enums.OrderStatusEnum;
 import com.ecit.shop.handler.IOrderHandler;
 import io.vertx.core.AsyncResult;
@@ -70,7 +68,7 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
                     List<JsonObject> commodityList = commoditys.list();
                     JsonArray condition = new JsonArray();
                     List<String> carts = new ArrayList<>(commodityList.size());
-
+                    condition.add(userId);
                     commodityList.forEach(commodity -> {
                         //减库存
                         if(commodity.containsKey("specifition_name")){
@@ -88,7 +86,7 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
                         carts.add("?");
                     });
                     //删除购物车记录
-                    exec.add(new JsonObject().put("type", JdbcEnum.update.name()).put("sql", Map.of("carts",carts.stream().collect(Collectors.joining(","))))
+                    exec.add(new JsonObject().put("type", JdbcEnum.update.name()).put("sql", MustacheUtils.mustacheString(CartSql.BATCH_DELETE_CART_SQL, Map.of("carts",carts.stream().collect(Collectors.joining(",")))))
                             .put("params", condition));
                     //查询收货地址
                     Future<JsonObject> addressFuture = Future.future();
