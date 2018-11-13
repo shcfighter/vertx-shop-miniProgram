@@ -8,7 +8,7 @@ import com.ecit.shop.constants.AddressSql;
 import com.ecit.shop.constants.CommoditySql;
 import com.ecit.shop.constants.CouponSql;
 import com.ecit.shop.constants.OrderSql;
-import com.ecit.shop.enums.OrderStatus;
+import com.ecit.shop.enums.OrderStatusEnum;
 import com.ecit.shop.handler.IOrderHandler;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
@@ -20,10 +20,11 @@ import io.vertx.reactivex.core.Vertx;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandler {
     private static final Logger LOGGER = LogManager.getLogger(OrderHandler.class);
@@ -32,6 +33,13 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
         super(vertx, config);
     }
 
+    /**
+     * 下单
+     * @param token
+     * @param params
+     * @param handler
+     * @return
+     */
     @Override
     public IOrderHandler insertOrder(String token, JsonObject params, Handler<AsyncResult<Integer>> handler) {
         Future<JsonObject> sessionFuture = this.getSession(token);
@@ -52,14 +60,17 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
                         totalPrice.add(new BigDecimal(commodity.getString("price")).multiply(new BigDecimal(commodity.getInteger("buy_num"))));
                         orderDetails.add(new JsonObject().put("commodity_id", commodity.getString("commodity_id")).put("commodity_name", commodity.getString("commodity_name"))
                                 .put("num", commodity.getInteger("buy_num")).put("image_url", commodity.getString("image_url"))
-                                .put("price", commodity.getString("price")));
+                                .put("price", commodity.getString("price")).put("specifition_name", commodity.containsKey("specifition_name") ? commodity.getString("specifition_name") : ""));
                     }
                     totalPrice.add(freightPrice);
                     freightPriceList.add(freightPrice);
                     return commoditys;
                 }).compose(commoditys -> {
-                    List<JsonObject> commodityList = commoditys.list();
                     List<JsonObject> exec = new ArrayList<>();
+                    List<JsonObject> commodityList = commoditys.list();
+                    JsonArray condition = new JsonArray();
+                    List<String> carts = new ArrayList<>(commodityList.size());
+
                     commodityList.forEach(commodity -> {
                         //减库存
                         if(commodity.containsKey("specifition_name")){
@@ -73,7 +84,12 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
                                     .put("params", new JsonArray().add(commodity.getInteger("buy_num"))
                                             .add(commodity.getString("commodity_id")).add(commodity.getLong("versions"))));
                         }
+                        condition.add(Long.parseLong(commodity.getString("cart_id")));
+                        carts.add("?");
                     });
+                    //删除购物车记录
+                    exec.add(new JsonObject().put("type", JdbcEnum.update.name()).put("sql", Map.of("carts",carts.stream().collect(Collectors.joining(","))))
+                            .put("params", condition));
                     //查询收货地址
                     Future<JsonObject> addressFuture = Future.future();
                     long addressId = Long.parseLong(params.getString("address_id"));
@@ -94,32 +110,54 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
                                 if(JsonUtils.isNull(coupon)){
                                     return Future.failedFuture("代金券不存在！");
                                 }
+                                //修改代金券状态
                                 exec.add(new JsonObject().put("type", JdbcEnum.update.name()).put("sql", CouponSql.UPDATE_COUPON_USER_SQL)
                                         .put("params", new JsonArray().add(params.getString("coupon_id")).add(userId)));
+                                //下单
                                 exec.add(new JsonObject().put("type", JdbcEnum.update.name()).put("sql", OrderSql.INSERT_ORDER_SQL)
                                        .put("params", new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(address.getInteger("country_id"))
                                                .add(address.getInteger("province_id")).add(address.getInteger("city_id"))
                                                .add(address.getInteger("district_id")).add(address.getString("address"))
                                                .add(address.getString("mobile")).add(address.getString("code")).add(orderDetails.encodePrettily())
-                                               .add(totalPriceDecimal.toString()).add(OrderStatus.VALID.getValue()).add(params.getString("coupon_id")).add(0)
-                                               .add(freightPriceList.get(0).toString()).add(totalPriceDecimal.subtract(freightPriceList.get(0)).toString())));
+                                               .add(totalPriceDecimal.toString()).add(OrderStatusEnum.VALID.getValue()).add(params.getString("coupon_id")).add(0)
+                                               .add(freightPriceList.get(0).toString()).add(totalPriceDecimal.subtract(freightPriceList.get(0)).toString())
+                                               .add(params.getString("remarks"))));
                                 this.executeTransaction(exec).subscribe(re -> resultFuture.complete(re.getUpdated()), resultFuture::fail);
                                 return resultFuture;
                            });
                        } else {
                            //无代金券处理
+                           //下单
                            exec.add(new JsonObject().put("type", JdbcEnum.update.name()).put("sql", OrderSql.INSERT_ORDER_SQL)
                                    .put("params", new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(address.getInteger("country_id"))
                                            .add(address.getInteger("province_id")).add(address.getInteger("city_id"))
                                            .add(address.getInteger("district_id")).add(address.getString("address"))
                                            .add(address.getString("mobile")).add(address.getString("code")).add(orderDetails.encodePrettily())
-                                           .add(totalPriceDecimal.toString()).add(OrderStatus.VALID.getValue()).add(0).add(0)
-                                           .add(freightPriceList.get(0).toString()).add(totalPriceDecimal.toString())));
+                                           .add(totalPriceDecimal.toString()).add(OrderStatusEnum.VALID.getValue()).add(0).add(0)
+                                           .add(freightPriceList.get(0).toString()).add(totalPriceDecimal.toString()).add(params.getString("remarks"))));
                            this.executeTransaction(exec).subscribe(re -> resultFuture.complete(re.getUpdated()), resultFuture::fail);
                            return resultFuture;
                        }
                     });
                 });
+        }).setHandler(handler);
+        return this;
+    }
+
+    @Override
+    public IOrderHandler orderList(String token, int status, int page, int pageSize, Handler<AsyncResult<List<JsonObject>>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<List<JsonObject>> future = Future.future();
+            if(status <= 0){
+                this.retrieveByPage(new JsonArray().add(userId), pageSize, page, OrderSql.SELECT_ORDER_PAGE_ALL_SQL)
+                        .subscribe(future::complete, future::fail);
+                return future;
+            }
+            this.retrieveByPage(new JsonArray().add(userId).add(status), pageSize, page, OrderSql.SELECT_ORDER_PAGE_SQL)
+                    .subscribe(future::complete, future::fail);
+            return future;
         }).setHandler(handler);
         return this;
     }
@@ -139,21 +177,29 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
             if(StringUtils.isEmpty(specifitionName)){
                 this.retrieveOne(new JsonArray().add(order.getLong("commodity_id")), CommoditySql.SELECT_COMMODITY_SQL)
                         .subscribe(re -> {
+                            if(JsonUtils.isNull(re)){
+                                Future.failedFuture("商品库存不存在");
+                                return ;
+                            }
                             if(re.getInteger("num") < order.getInteger("number")){
                                 Future.failedFuture("商品库存不足");
                                 return ;
                             }
-                            JsonObject com = re.put("buy_num", order.getInteger("number"));
+                            JsonObject com = re.put("buy_num", order.getInteger("number")).put("cart_id", order.getString("cart_id"));
                             future.complete(com);
                         }, future::fail);
             }else{
                 this.retrieveOne(new JsonArray().add(order.getLong("commodity_id")).add(specifitionName), CommoditySql.SELECT_COMMODITY_SPECIFITION_SQL)
                         .subscribe(re -> {
+                            if(JsonUtils.isNull(re)){
+                                Future.failedFuture("商品库存不存在");
+                                return ;
+                            }
                             if(re.getInteger("num") < order.getInteger("number")){
                                 Future.failedFuture("商品库存不足");
                                 return ;
                             }
-                            JsonObject com = re.put("buy_num", order.getInteger("number"));
+                            JsonObject com = re.put("buy_num", order.getInteger("number")).put("cart_id", order.getString("cart_id"));
                             future.complete(com);
                         }, future::fail);
             }

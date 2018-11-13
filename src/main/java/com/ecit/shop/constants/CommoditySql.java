@@ -13,7 +13,7 @@ public interface CommoditySql {
     /**
      * 查询商品详情
      */
-    String SELECT_COMMODITY_SPECIFITION_SQL = "select c.price::numeric, cs.num, c.commodity_id::text, c.commodity_name, c.status, c.freight_price::numeric, c.image_url, cs.versions from t_commodity c LEFT JOIN t_commodity_specifition cs on(c.commodity_id = cs.commodity_id) where c.commodity_id = ? and c.status = 1 and c.is_deleted = 0 and cs.is_deleted = 0";
+    String SELECT_COMMODITY_SPECIFITION_SQL = "select c.price::numeric, cs.num, c.commodity_id::text, c.commodity_name, c.status, c.freight_price::numeric, c.image_url, cs.versions from t_commodity c LEFT JOIN t_commodity_specifition cs on(c.commodity_id = cs.commodity_id) where c.commodity_id = ? and specifition_name = ? and c.status = 1 and c.is_deleted = 0 and cs.is_deleted = 0";
 
     /**
      * 查询商品价格（规格）

@@ -109,14 +109,13 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
             long userId = session.getLong("user_id");
             Future<Integer> resultFuture = Future.future();
             JsonArray condition = new JsonArray().add(userId);
-            List<String> buffer = Lists.newArrayList();
+            List<String> carts = Lists.newArrayList();
             Stream.of(StringUtils.split(params.getString("carts"), ",")).map(Long::parseLong)
                     .forEach(id -> {
-                buffer.add("?");
+                        carts.add("?");
                 condition.add(id);
             });
-            Map<String, Object> map = new HashMap<>();
-            map.put("carts",buffer.stream().collect(Collectors.joining(",")));
+            Map<String, Object> map = Map.of("carts",carts.stream().collect(Collectors.joining(",")));
             this.execute(condition,
                     MustacheUtils.mustacheString(CartSql.BATCH_DELETE_CART_SQL, map))
                     .subscribe(resultFuture::complete, resultFuture::fail);

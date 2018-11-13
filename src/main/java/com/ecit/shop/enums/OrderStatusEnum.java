@@ -3,7 +3,7 @@ package com.ecit.shop.enums;
 /**
  * 订单状态
  */
-public enum OrderStatus {
+public enum OrderStatusEnum {
     /**
      * 1=有效
      */
@@ -40,7 +40,7 @@ public enum OrderStatus {
     private int value;
     private String desc;
 
-    OrderStatus(int value, String desc) {
+    OrderStatusEnum(int value, String desc) {
         this.value = value;
         this.desc = desc;
     }

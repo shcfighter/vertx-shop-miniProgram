@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -94,6 +95,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
          * 订单
          */
         router.put("/api/order/insert").handler(this::insertOrderHandler);     //订单
+        router.get("/api/order/list").handler(this::orderPageHandler);     //分页订单列表
 
 
         //全局异常处理
@@ -542,4 +544,23 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         });
     }
 
+    /**
+     * 分页订单列表
+     * @param context
+     */
+    private void orderPageHandler(RoutingContext context){
+        int status = Integer.parseInt(context.request().getParam("status"));
+        int page = Integer.parseInt(context.request().getParam("page"));
+        int pageSize = Integer.parseInt(context.request().getParam("pageSize"));
+        orderHandler.orderList(context.request().getHeader("token"), status, page, pageSize, hander -> {
+            if(hander.failed()){
+                LOGGER.info("查询订单失败:", hander.cause());
+                this.returnWithFailureMessage(context, "查询订单失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "查询订单成功",
+                    hander.result().stream().map(order -> order.put("order_details", new JsonArray(order.getString("order_details")))).collect(Collectors.toList()));
+            return;
+        });
+    }
 }
