@@ -15,7 +15,6 @@ import io.vertx.reactivex.ext.web.handler.BodyHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
