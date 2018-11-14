@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -96,6 +95,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
          */
         router.put("/api/order/insert").handler(this::insertOrderHandler);     //订单
         router.get("/api/order/list").handler(this::orderPageHandler);     //分页订单列表
+        router.get("/api/order/detail/:id").handler(this::orderDetailHandler);     //查询订单详情
 
 
         //全局异常处理
@@ -453,7 +453,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      * @param context
      */
     private void cartDelHandler(RoutingContext context){
-        cartHandler.delCart(context.request().getHeader("token"), Long.parseLong(context.pathParam("id")), context.getBodyAsJson(), hander -> {
+        cartHandler.delCart(context.request().getHeader("token"), Long.parseLong(context.pathParam("id")), hander -> {
             if(hander.failed()){
                 LOGGER.info("删除购物车商品失败:", hander.cause());
                 this.returnWithFailureMessage(context, "删除购物车商品失败");
@@ -563,4 +563,23 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
             return;
         });
     }
+
+    /**
+     * 查询订单详情
+     * @param context
+     */
+    private void orderDetailHandler(RoutingContext context){
+        orderHandler.orderDetail(context.request().getHeader("token"), Long.parseLong(context.pathParam("id")), hander -> {
+            if(hander.failed()){
+                LOGGER.info("查询订单详情失败:", hander.cause());
+                this.returnWithFailureMessage(context, "查询订单详情失败");
+                return;
+            }
+            JsonObject order = hander.result();
+            order.put("order_details", new JsonArray(order.getString("order_details")));
+            this.returnWithSuccessMessage(context, "查询订单详情成功", order);
+            return;
+        });
+    }
+
 }

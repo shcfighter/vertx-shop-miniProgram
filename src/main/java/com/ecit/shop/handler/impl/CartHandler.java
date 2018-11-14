@@ -80,21 +80,19 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
     }
 
     @Override
-    public ICartHandler delCart(String token, long id, JsonObject params, Handler<AsyncResult<Integer>> handler) {
+    public ICartHandler delCart(String token, long cartId, Handler<AsyncResult<Integer>> handler) {
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
             final long userId = session.getLong("user_id");
             Future<JsonObject> cartFuture = Future.future();
-            this.retrieveOne(new JsonArray().add(userId).add(params.getLong("commodity_id")).add(params.getString("specifition_name")),
-                    CartSql.SELECT_CART_BY_SPECIFITION_SQL).subscribe(cartFuture::complete, cartFuture::fail);
+            this.retrieveOne(new JsonArray().add(userId).add(cartId),
+                    CartSql.SELECT_CART_BY_ID_SQL).subscribe(cartFuture::complete, cartFuture::fail);
             return cartFuture.compose(cart -> {
                 if(Objects.isNull(cart) || cart.isEmpty()){
                     Future.failedFuture("购物车中商品不存在！");
                 }
                 Future<Integer> resultFuture = Future.future();
-                this.execute(new JsonArray().add(userId)
-                        .add(params.getLong("commodity_id")).add(params.getString("specifition_name"))
-                        .add(cart.getLong("versions")), CartSql.DELETE_CART_SQL).
+                this.execute(new JsonArray().add(userId).add(cartId).add(cart.getLong("versions")), CartSql.DELETE_CART_SQL).
                         subscribe(resultFuture::complete, resultFuture::fail);
                 return resultFuture;
             });

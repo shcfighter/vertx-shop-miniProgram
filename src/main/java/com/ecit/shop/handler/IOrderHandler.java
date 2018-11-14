@@ -22,4 +22,6 @@ public interface IOrderHandler {
     @Fluent
     IOrderHandler orderList(String token, int status, int page, int pageSize, Handler<AsyncResult<List<JsonObject>>> handler);
 
+    @Fluent
+    IOrderHandler orderDetail(String token, long orderId, Handler<AsyncResult<JsonObject>> handler);
 }

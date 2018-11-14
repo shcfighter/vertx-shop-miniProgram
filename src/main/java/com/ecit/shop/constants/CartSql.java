@@ -16,6 +16,11 @@ public interface CartSql {
     String SELECT_CART_SQL = "select cart_id::text, user_id, commodity_id, commodity_name, num, price::numeric, image_url, specifition_name, freight_price::numeric, create_time, versions from t_cart where user_id = ? and is_deleted = 0 order by create_time desc";
 
     /**
+     * 根据cart_id查询
+     */
+    String SELECT_CART_BY_ID_SQL = "select cart_id::text, user_id, commodity_id, commodity_name, num, price::numeric, image_url, specifition_name, freight_price::numeric, create_time, versions from t_cart where user_id = ? and cart_id = ? and is_deleted = 0 order by create_time desc";
+
+    /**
      * 查询商品数量
      */
     String SELECT_CART_BY_SPECIFITION_SQL = "select cart_id::text, user_id, commodity_id, commodity_name, num, price::numeric, image_url, specifition_name, create_time, versions from t_cart where user_id = ? and commodity_id = ? and specifition_name = ? and is_deleted = 0 ";

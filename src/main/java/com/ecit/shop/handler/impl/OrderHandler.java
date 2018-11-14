@@ -115,7 +115,7 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
                                 exec.add(new JsonObject().put("type", JdbcEnum.update.name()).put("sql", OrderSql.INSERT_ORDER_SQL)
                                        .put("params", new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(address.getInteger("country_id"))
                                                .add(address.getInteger("province_id")).add(address.getInteger("city_id"))
-                                               .add(address.getInteger("district_id")).add(address.getString("address"))
+                                               .add(address.getInteger("district_id")).add(address.getString("name")).add(address.getString("address"))
                                                .add(address.getString("mobile")).add(address.getString("code")).add(orderDetails.encodePrettily())
                                                .add(totalPriceDecimal.toString()).add(OrderStatusEnum.VALID.getValue()).add(params.getString("coupon_id")).add(0)
                                                .add(freightPriceList.get(0).toString()).add(totalPriceDecimal.subtract(freightPriceList.get(0)).toString())
@@ -129,7 +129,7 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
                            exec.add(new JsonObject().put("type", JdbcEnum.update.name()).put("sql", OrderSql.INSERT_ORDER_SQL)
                                    .put("params", new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(address.getInteger("country_id"))
                                            .add(address.getInteger("province_id")).add(address.getInteger("city_id"))
-                                           .add(address.getInteger("district_id")).add(address.getString("address"))
+                                           .add(address.getInteger("district_id")).add(address.getString("name")).add(address.getString("address"))
                                            .add(address.getString("mobile")).add(address.getString("code")).add(orderDetails.encodePrettily())
                                            .add(totalPriceDecimal.toString()).add(OrderStatusEnum.VALID.getValue()).add(0).add(0)
                                            .add(freightPriceList.get(0).toString()).add(totalPriceDecimal.toString()).add(params.getString("remarks"))));
@@ -154,6 +154,19 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
                 return future;
             }
             this.retrieveByPage(new JsonArray().add(userId).add(status), pageSize, page, OrderSql.SELECT_ORDER_PAGE_SQL)
+                    .subscribe(future::complete, future::fail);
+            return future;
+        }).setHandler(handler);
+        return this;
+    }
+
+    @Override
+    public IOrderHandler orderDetail(String token, long orderId, Handler<AsyncResult<JsonObject>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<JsonObject> future = Future.future();
+            this.retrieveOne(new JsonArray().add(orderId).add(userId), OrderSql.SELECT_ORDER_BY_ID_SQL)
                     .subscribe(future::complete, future::fail);
             return future;
         }).setHandler(handler);

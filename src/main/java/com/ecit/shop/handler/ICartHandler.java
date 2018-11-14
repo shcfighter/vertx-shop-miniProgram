@@ -26,7 +26,7 @@ public interface ICartHandler {
     ICartHandler findCart(String token, JsonObject params, Handler<AsyncResult<JsonObject>> handler);
 
     @Fluent
-    ICartHandler delCart(String token, long id, JsonObject params, Handler<AsyncResult<Integer>> handler);
+    ICartHandler delCart(String token, long cartId, Handler<AsyncResult<Integer>> handler);
 
     @Fluent
     ICartHandler delBatchCart(String token, JsonObject params, Handler<AsyncResult<Integer>> handler);
