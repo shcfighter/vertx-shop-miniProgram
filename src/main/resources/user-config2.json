@@ -4,7 +4,7 @@
   "user.http.address": "0.0.0.0",
   "user.http.port": 8787,
   "postgresql": {
-    "host" : "111.231.132.168",
+    "host" : "localhost",
     "port" : 5432,
     "maxPoolSize" : 50,
     "username" : "postgres",
@@ -16,13 +16,13 @@
   "weixin.appid" : "wxf98bdcd6150b7e33",
   "weixin.secret" : "35b319c6a9aee16e3977bf0d0d24ff7e",
   "redis":{
-      "host": "111.231.132.168",
+      "host": "localhost",
       "port": 6379,
       "password": "h123456"
   },
   "mongodb": {
     // Single Cluster Settings
-    "host" : "111.231.132.168", // string
+    "host" : "localhost", // string
     "port" : 27017,      // int
     // Multiple Cluster Settings
     /*"hosts" : [
@@ -65,7 +65,7 @@
     "address":"eb.elasticsearch",
     "transportAddresses":[
       {
-        "hostname":"111.231.132.168",
+        "hostname":"localhost",
         "port":9300
       }
     ],
