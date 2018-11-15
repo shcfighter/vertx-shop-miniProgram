@@ -1,5 +1,6 @@
 package com.ecit.shop.handler.impl;
 
+import com.ecit.common.constants.Constants;
 import com.ecit.common.db.JdbcRxRepositoryWrapper;
 import com.ecit.shop.constants.CategorySql;
 import com.ecit.shop.constants.CommoditySql;
@@ -24,10 +25,6 @@ import java.util.List;
 public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommodityHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(CommodityHandler.class);
-    /**
-     * es商品索引indeces
-     */
-    private static final String SHOP_INDICES = "shop_miniprogram";
 
     final RxElasticSearchService rxElasticSearchService;
     final Vertx vertx;
@@ -83,7 +80,7 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
                 .setFetchSource(true).setSize(pageSize).setFrom(this.calcPage(page, pageSize))
                 //.addFieldSort("commodity_id", SortOrder.DESC);
                 .addScripSort("Math.random()", ScriptSortOption.Type.NUMBER, new JsonObject(), SortOrder.DESC); //随机排序
-        rxElasticSearchService.search(SHOP_INDICES, searchOptions)
+        rxElasticSearchService.search(Constants.SHOP_INDICES, searchOptions)
                 .subscribe(future::complete, future::fail);
         future.setHandler(handler);
         return this;
@@ -101,7 +98,7 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                 .setFetchSource(true)
                 .setSize(1);
-        rxElasticSearchService.search(SHOP_INDICES, searchOptions)
+        rxElasticSearchService.search(Constants.SHOP_INDICES, searchOptions)
                 .subscribe(future::complete, future::fail);
         future.setHandler(handler);
         return this;

@@ -32,6 +32,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
     private ICartHandler cartHandler;
     private ICouponHandler couponHandler;
     private IOrderHandler orderHandler;
+    private ICommodityHistoryHandler commodityHistoryHandler;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -43,6 +44,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         this.cartHandler = new CartHandler(vertx, this.config());
         this.couponHandler = new CouponHandler(vertx, this.config());
         this.orderHandler = new OrderHandler(vertx, this.config());
+        this.commodityHistoryHandler = new CommodityHistoryHandler(vertx, this.config());
 
         final Router router = Router.router(vertx);
         // cookie and session handler
@@ -95,6 +97,9 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.put("/api/order/insert").handler(this::insertOrderHandler);     //订单
         router.get("/api/order/list").handler(this::orderPageHandler);     //分页订单列表
         router.get("/api/order/detail/:id").handler(this::orderDetailHandler);     //查询订单详情
+
+        router.get("/api/browse/list").handler(this::browsePageHandler);    //分页查询浏览记录
+        router.get("/api/collect/list").handler(this::collectPageHandler);    //分页查询收藏记录
 
 
         //全局异常处理
@@ -336,7 +341,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 return ;
             } else {
                 final Hits hits = handler.result().getHits();
-                JsonObject items = hits.getHits().get(0).getSource();
+                final JsonObject items = hits.getHits().get(0).getSource();
                 JsonArray images = items.getJsonArray("detail_image_url");
                 JsonArray commodityParams = items.getJsonArray("commodity_params");
                 StringBuilder content = new StringBuilder();
@@ -355,9 +360,11 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                     content.append(image);
                     content.append("\"/></p>");
                 });
+                JsonObject result = new JsonObject().put("basicInfo", items).put("content", content.toString());
 
-                JsonObject result = new JsonObject().put("basicInfo", hits.getHits().get(0).getSource())
-                        .put("content", content.toString());
+                //加入浏览记录
+                commodityHistoryHandler.insertBrowsingHistory(context.request().getHeader("token"), items, re -> {});
+
                 this.returnWithSuccessMessage(context, "查询商品信息详情成功", result);
                 return ;
             }
@@ -581,4 +588,57 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         });
     }
 
+    /**
+     * 分页查询商品浏览记录
+     * @param context
+     */
+    private void browsePageHandler(RoutingContext context){
+        int page = Integer.parseInt(context.request().getParam("page"));
+        int pageSize = Integer.parseInt(context.request().getParam("pageSize"));
+        commodityHistoryHandler.findBrowsingHistory(context.request().getHeader("token"), page, pageSize, hander -> {
+            if(hander.failed()){
+                LOGGER.info("查询商品浏览记录失败:", hander.cause());
+                this.returnWithFailureMessage(context, "查询商品浏览记录失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "查询商品浏览记录成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 分页查询商品收藏记录
+     * @param context
+     */
+    private void collectPageHandler(RoutingContext context){
+        int page = Integer.parseInt(context.request().getParam("page"));
+        int pageSize = Integer.parseInt(context.request().getParam("pageSize"));
+        commodityHistoryHandler.findCollectHistory(context.request().getHeader("token"), page, pageSize, hander -> {
+            if(hander.failed()){
+                LOGGER.info("查询商品收藏记录失败:", hander.cause());
+                this.returnWithFailureMessage(context, "查询商品收藏记录失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "查询商品收藏记录成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 更新商品收藏记录
+     * @param context
+     */
+    private void insertCollectHandler(RoutingContext context){
+        int page = Integer.parseInt(context.request().getParam("page"));
+        int pageSize = Integer.parseInt(context.request().getParam("pageSize"));
+        commodityHistoryHandler.findCollectHistory(context.request().getHeader("token"), page, pageSize, hander -> {
+            if(hander.failed()){
+                LOGGER.info("更新商品收藏记录失败:", hander.cause());
+                this.returnWithFailureMessage(context, "更新商品收藏记录失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "更新商品收藏记录成功", hander.result());
+            return;
+        });
+    }
 }

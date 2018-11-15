@@ -60,6 +60,16 @@ public class ShopVerticle extends BaseMicroserviceRxVerticle{
                                         .put("port", 9300)))
                                 .put("cluster_name", "vertx_shop")
                                 .put("client_transport_sniff", false))
+                        .put("mongodb", new JsonObject().put("host", "111.231.132.168")
+                                .put("port", 27017)
+                                .put("serverSelectionTimeoutMS", 30000)
+                                .put("username", "shop_user")
+                                .put("password", "h123456")
+                                .put("db_name", "vertx_shop")
+                                .put("sendBufferSize", 8192)
+                                .put("maxPoolSize", 50)
+                                .put("minPoolSize", 25)
+                                .put("keepAlive", true))
                 )));
     }
 }

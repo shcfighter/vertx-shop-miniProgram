@@ -1,19 +1,17 @@
 package com.ecit.common.db;
 
 import com.ecit.common.constants.Constants;
-import com.ecit.shop.constants.CouponSql;
 import com.ecit.shop.constants.UserSql;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.asyncsql.PostgreSQLClient;
+import io.vertx.reactivex.ext.mongo.MongoClient;
 import io.vertx.reactivex.ext.sql.SQLClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.redis.RedisClient;
@@ -22,8 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
  * Helper and wrapper class for JDBC repository services.
@@ -32,10 +28,11 @@ public class JdbcRxRepositoryWrapper {
 
   protected final SQLClient postgreSQLClient;
   protected final RedisClient redisClient;
+  protected final MongoClient mongoClient;
 
   public JdbcRxRepositoryWrapper(Vertx vertx, JsonObject config) {
-      JsonObject postgresqlConfig = config.getJsonObject("postgresql");
-    this.postgreSQLClient = PostgreSQLClient.createShared(vertx, postgresqlConfig);
+    this.postgreSQLClient = PostgreSQLClient.createShared(vertx, config.getJsonObject("postgresql"));
+    this.mongoClient = MongoClient.createShared(vertx, config.getJsonObject("mongodb"));
     JsonObject redisConfig = config.getJsonObject("redis");
     this.redisClient = RedisClient.create(vertx, new RedisOptions().setHost(redisConfig.getString("host", "localhost"))
             .setPort(redisConfig.getInteger("port", 6379)).setAuth(redisConfig.getString("password")));
@@ -190,4 +187,5 @@ public class JdbcRxRepositoryWrapper {
       redisClient.rxHset(Constants.VERTX_WEB_SESSION, token, jsonObject.toString()).subscribe();
       redisClient.rxExpire(Constants.VERTX_WEB_SESSION, Constants.SESSION_EXPIRE_TIME).subscribe();
   }
+
 }

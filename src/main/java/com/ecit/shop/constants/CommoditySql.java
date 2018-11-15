@@ -29,4 +29,9 @@ public interface CommoditySql {
      * 购买商品（规格）
      */
     String UPDATE_BUY_COMMODITY_SPECIFITION_SQL = "update t_commodity_specifition set num = (num - ?), versions = (versions + 1), update_time = now() where commodity_id = ? and specifition_name = ? and versions = ? and status = 1 and is_deleted = 0";
+
+    /**
+     * 根据商品id查询
+     */
+    String SELECT_COMMODITY_BY_ID_SQL = "select * from t_commodity where commodity_id = ? and is_deleted = 0";
 }

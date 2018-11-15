@@ -52,9 +52,7 @@ public class ElasticSearchServiceVerticle extends AbstractVerticle {
         this.adminService = new DefaultElasticSearchAdminService(new DefaultElasticSearchService(new DefaultTransportClientFactory(),
                 new JsonElasticSearchConfigurator(esConfig)));
 
-        System.out.println(esConfig);
         String address = esConfig.getString("address");
-        System.out.println(address);
         if (address == null || address.isEmpty()) {
             throw new IllegalStateException("address field must be specified in config for handler verticle");
         }
