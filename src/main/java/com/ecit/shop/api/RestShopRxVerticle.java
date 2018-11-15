@@ -72,7 +72,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.put("/api/updateAddress").handler(this::updateAddressHandler);      //修改收货地址
         router.get("/api/addressList").handler(this::addressListHandler);        //收货地址列表
         router.get("/api/addressDetail/:id").handler(this::addressDetailHandler);       //收货地址详情
-        router.delete("/api/delAddress/:id").handler(this::addressDelHandler);      //删除收货地址
+        router.put("/api/delAddress/:id").handler(this::addressDelHandler);      //删除收货地址
         router.get("/api/defaultAddress").handler(this::defaultAddressHandler);       //默认收货地址详情
         router.put("/api/updateDefaultAddress/:id").handler(this::updateDefaultAddressHandler);       //修改默认收货地址详情
         /**
@@ -81,8 +81,8 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.post("/api/insertCart").handler(this::insertCartHandler);      //新增购物车
         router.get("/api/cartList").handler(this::cartListHandler);        //购物车列表
         router.get("/api/findCart").handler(this::findCartHandler);        //购物车列表
-        router.delete("/api/delCart/:id").handler(this::cartDelHandler);      //删除收货地址
-        router.delete("/api/delBatchCart").handler(this::cartDelBatchHandler);      //批量删除收货地址
+        router.put("/api/delCart/:id").handler(this::cartDelHandler);      //删除收货地址
+        router.put("/api/delBatchCart").handler(this::cartDelBatchHandler);      //批量删除收货地址
         /**
          * 代金券
          */
