@@ -37,7 +37,7 @@ public class CommodityHandler extends JdbcRxRepositoryWrapper implements ICommod
         super(vertx, config);
         this.vertx = vertx;
         this.config = config;
-        this.rxElasticSearchService = RxElasticSearchService.createEventBusProxy(this.vertx.getDelegate(), config.getString("address"));
+        this.rxElasticSearchService = RxElasticSearchService.createEventBusProxy(this.vertx.getDelegate(), config.getJsonObject("es").getString("address"));
     }
 
 

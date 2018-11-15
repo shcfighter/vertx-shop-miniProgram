@@ -47,15 +47,16 @@ public class ElasticSearchServiceVerticle extends AbstractVerticle {
         super.start(startFuture);
         // workaround for problem between ES netty and vertx (both wanting to set the same value)
         System.setProperty("es.set.netty.runtime.available.processors", "false");
-        this.service = new DefaultElasticSearchService(new DefaultTransportClientFactory(), new JsonElasticSearchConfigurator(this.config()));
+        JsonObject esConfig = this.config().getJsonObject("es");
+        this.service = new DefaultElasticSearchService(new DefaultTransportClientFactory(), new JsonElasticSearchConfigurator(esConfig));
         this.adminService = new DefaultElasticSearchAdminService(new DefaultElasticSearchService(new DefaultTransportClientFactory(),
-                new JsonElasticSearchConfigurator(this.config())));
+                new JsonElasticSearchConfigurator(esConfig)));
 
-        String address = config().getString("address");
+        String address = esConfig.getString("address");
         if (address == null || address.isEmpty()) {
             throw new IllegalStateException("address field must be specified in config for handler verticle");
         }
-        String adminAddress = config().getString("address.admin");
+        String adminAddress = esConfig.getString("address.admin");
         if (adminAddress == null || adminAddress.isEmpty()) {
             adminAddress = address + ".admin";
         }

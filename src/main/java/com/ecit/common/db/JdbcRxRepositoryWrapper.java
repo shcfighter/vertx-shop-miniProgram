@@ -34,10 +34,11 @@ public class JdbcRxRepositoryWrapper {
   protected final RedisClient redisClient;
 
   public JdbcRxRepositoryWrapper(Vertx vertx, JsonObject config) {
-    this.postgreSQLClient = PostgreSQLClient.createShared(vertx, config);
-    JsonObject redis = config.getJsonObject("redis");
-    this.redisClient = RedisClient.create(vertx, new RedisOptions().setHost(redis.getString("host", "localhost"))
-            .setPort(redis.getInteger("port", 6379)).setAuth(redis.getString("password")));
+      JsonObject postgresqlConfig = config.getJsonObject("postgresql");
+    this.postgreSQLClient = PostgreSQLClient.createShared(vertx, postgresqlConfig);
+    JsonObject redisConfig = config.getJsonObject("redis");
+    this.redisClient = RedisClient.create(vertx, new RedisOptions().setHost(redisConfig.getString("host", "localhost"))
+            .setPort(redisConfig.getInteger("port", 6379)).setAuth(redisConfig.getString("password")));
   }
 
   /**
