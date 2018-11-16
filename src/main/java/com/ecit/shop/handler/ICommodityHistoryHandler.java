@@ -23,9 +23,18 @@ public interface ICommodityHistoryHandler {
     ICommodityHistoryHandler insertBrowsingHistory(String token, JsonObject document, Handler<AsyncResult<String>> handler);
 
     @Fluent
+    ICommodityHistoryHandler rowNumBrowsingHistory(String token, Handler<AsyncResult<Long>> handler);
+
+    @Fluent
     ICommodityHistoryHandler findCollectHistory(String token, int page, int pageSize, Handler<AsyncResult<List<JsonObject>>> handler);
 
     @Fluent
-    ICommodityHistoryHandler insertCollectHistory(String token, long commodityId, Handler<AsyncResult<String>> handler);
+    ICommodityHistoryHandler insertCollectHistory(String token, long commodityId, Handler<AsyncResult<Integer>> handler);
+
+    @Fluent
+    ICommodityHistoryHandler rowNumCollectHistory(String token, Handler<AsyncResult<Long>> handler);
+
+    @Fluent
+    ICommodityHistoryHandler findCollectCommodity(String token, long commodityId, Handler<AsyncResult<JsonObject>> handler);
 
 }

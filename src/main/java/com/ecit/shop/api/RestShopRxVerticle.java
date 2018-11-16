@@ -2,6 +2,7 @@ package com.ecit.shop.api;
 
 import com.ecit.auth.ShopUserSessionHandler;
 import com.ecit.common.rx.RestAPIRxVerticle;
+import com.ecit.common.utils.JsonUtils;
 import com.ecit.shop.handler.*;
 import com.ecit.shop.handler.impl.*;
 import com.hubrick.vertx.elasticsearch.model.Hits;
@@ -100,6 +101,8 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
 
         router.get("/api/browse/list").handler(this::browsePageHandler);    //分页查询浏览记录
         router.get("/api/collect/list").handler(this::collectPageHandler);    //分页查询收藏记录
+        router.get("/api/collect/findCommodity/:id").handler(this::findCommodityHandler);    //查询收藏记录
+        router.put("/api/collect/:id").handler(this::insertCollectHistoryHandler);    //收藏商品记录
 
 
         //全局异常处理
@@ -638,6 +641,42 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 return;
             }
             this.returnWithSuccessMessage(context, "更新商品收藏记录成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 查询商品是否收藏
+     * @param context
+     */
+    private void findCommodityHandler(RoutingContext context){
+        commodityHistoryHandler.findCollectCommodity(context.request().getHeader("token"), Long.parseLong(context.pathParam("id")), hander -> {
+            if(hander.failed()){
+                LOGGER.info("查询商品收藏记录失败:", hander.cause());
+                this.returnWithFailureMessage(context, "查询商品收藏记录失败");
+                return;
+            }
+            if(JsonUtils.isNull(hander.result())){
+                this.returnWithSuccessMessage(context, "查询商品收藏记录不存在", -1);
+                return;
+            }
+            this.returnWithSuccessMessage(context, "查询商品收藏记录存在", 0);
+            return;
+        });
+    }
+
+    /**
+     * 收藏商品
+     * @param context
+     */
+    private void insertCollectHistoryHandler(RoutingContext context){
+        commodityHistoryHandler.insertCollectHistory(context.request().getHeader("token"), Long.parseLong(context.pathParam("id")), hander -> {
+            if(hander.failed()){
+                LOGGER.info("收藏商品记录失败:", hander.cause());
+                this.returnWithFailureMessage(context, "收藏商品记录失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "收藏商品记录成功", hander.result());
             return;
         });
     }

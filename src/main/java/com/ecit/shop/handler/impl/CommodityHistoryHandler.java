@@ -53,6 +53,19 @@ public class CommodityHistoryHandler extends JdbcRxRepositoryWrapper implements 
     }
 
     @Override
+    public ICommodityHistoryHandler rowNumBrowsingHistory(String token, Handler<AsyncResult<Long>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<Long> future = Future.future();
+            mongoClient.rxCount(Constants.MONGO_COLLECTION_COMDITIDY_BROWSE, new JsonObject().put("user_id", userId))
+                    .subscribe(future::complete, future::fail);
+            return future;
+        }).setHandler(handler);
+        return this;
+    }
+
+    @Override
     public ICommodityHistoryHandler findCollectHistory(String token, int page, int pageSize, Handler<AsyncResult<List<JsonObject>>> handler) {
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
@@ -68,7 +81,7 @@ public class CommodityHistoryHandler extends JdbcRxRepositoryWrapper implements 
     }
 
     @Override
-    public ICommodityHistoryHandler insertCollectHistory(String token, long commodityId, Handler<AsyncResult<String>> handler) {
+    public ICommodityHistoryHandler insertCollectHistory(String token, long commodityId, Handler<AsyncResult<Integer>> handler) {
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
             long userId = session.getLong("user_id");
@@ -76,8 +89,6 @@ public class CommodityHistoryHandler extends JdbcRxRepositoryWrapper implements 
             mongoClient.rxFindOneAndDelete(Constants.MONGO_COLLECTION_COMDITIDY_COLLECT, new JsonObject().put("user_id", userId).put("commodity_id", commodityId).put("is_deleted", 0))
                     .subscribe(collectFuture::complete, collectFuture::fail);
             return collectFuture.compose(collect -> {
-                System.out.println("============================================================");
-                System.out.println(collect);
                if(JsonUtils.isNull(collect)){
                    Future<JsonObject> commodityFuture = Future.future();
                    this.retrieveOne(new JsonArray().add(commodityId), CommoditySql.SELECT_COMMODITY_BY_ID_SQL).subscribe(commodityFuture::complete, commodityFuture::fail);
@@ -86,13 +97,39 @@ public class CommodityHistoryHandler extends JdbcRxRepositoryWrapper implements 
                            return Future.failedFuture("商品不存在");
                        }
                        mongoClient.rxInsert(Constants.MONGO_COLLECTION_COMDITIDY_COLLECT,
-                               new JsonObject().put("commodity", commodity).put("commodity_id", commodity.getLong("commodity_id"))
+                               new JsonObject().put("commodity", commodity.encodePrettily()).put("commodity_id", commodity.getLong("commodity_id"))
                                        .put("user_id", userId).put("is_deleted", 0).put("create_time", System.currentTimeMillis())).subscribe();
-                       return Future.succeededFuture("success");
+                       return Future.succeededFuture(0);
                    });
                }
-               return Future.succeededFuture("success");
+               return Future.succeededFuture(-1);
             });
+        }).setHandler(handler);
+        return this;
+    }
+
+    @Override
+    public ICommodityHistoryHandler rowNumCollectHistory(String token, Handler<AsyncResult<Long>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<Long> future = Future.future();
+            mongoClient.rxCount(Constants.MONGO_COLLECTION_COMDITIDY_COLLECT, new JsonObject().put("user_id", userId))
+                    .subscribe(future::complete, future::fail);
+            return future;
+        }).setHandler(handler);
+        return this;
+    }
+
+    @Override
+    public ICommodityHistoryHandler findCollectCommodity(String token, long commodityId, Handler<AsyncResult<JsonObject>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<JsonObject> future = Future.future();
+            mongoClient.rxFindOne(Constants.MONGO_COLLECTION_COMDITIDY_COLLECT, new JsonObject().put("user_id", userId).put("commodity_id", commodityId), null)
+                    .subscribe(future::complete, future::fail);
+            return future;
         }).setHandler(handler);
         return this;
     }
