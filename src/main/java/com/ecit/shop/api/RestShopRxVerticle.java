@@ -100,9 +100,11 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.get("/api/order/detail/:id").handler(this::orderDetailHandler);     //查询订单详情
 
         router.get("/api/browse/list").handler(this::browsePageHandler);    //分页查询浏览记录
+        router.get("/api/browse/num").handler(this::rowNumBrowseHistoryHandler);    //浏览商品记录数
         router.get("/api/collect/list").handler(this::collectPageHandler);    //分页查询收藏记录
         router.get("/api/collect/findCommodity/:id").handler(this::findCommodityHandler);    //查询收藏记录
         router.put("/api/collect/:id").handler(this::insertCollectHistoryHandler);    //收藏商品记录
+        router.get("/api/collect/num").handler(this::rowNumCollectHistoryHandler);    //收藏商品记录数
 
 
         //全局异常处理
@@ -677,6 +679,38 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 return;
             }
             this.returnWithSuccessMessage(context, "收藏商品记录成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 收藏商品记录数
+     * @param context
+     */
+    private void rowNumCollectHistoryHandler(RoutingContext context){
+        commodityHistoryHandler.rowNumCollectHistory(context.request().getHeader("token"), hander -> {
+            if(hander.failed()){
+                LOGGER.info("查询收藏商品记录数失败:", hander.cause());
+                this.returnWithFailureMessage(context, "查询收藏商品记录数失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "查询收藏商品记录数成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 浏览商品记录数
+     * @param context
+     */
+    private void rowNumBrowseHistoryHandler(RoutingContext context){
+        commodityHistoryHandler.rowNumBrowsingHistory(context.request().getHeader("token"), hander -> {
+            if(hander.failed()){
+                LOGGER.info("查询浏览商品记录数失败:", hander.cause());
+                this.returnWithFailureMessage(context, "查询浏览商品记录数失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "查询浏览商品记录数成功", hander.result());
             return;
         });
     }
