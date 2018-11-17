@@ -23,7 +23,7 @@ public class Constants {
     /**
      * mongodb 商品浏览记录collection
      */
-    public static final String MONGO_COLLECTION_COMDITIDY_BROWSE = "miniprogram_comditidy_browsing";
+    public static final String MONGO_COLLECTION_COMDITIDY_BROWSE = "miniprogram_comditidy_browse";
 
     /**
      * mongodb 商品收藏记录collection

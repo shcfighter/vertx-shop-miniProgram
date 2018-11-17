@@ -56,7 +56,6 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         //不需要登录
         router.get("/api/accredit").handler(this::accreditHandler);     //微信授权
         router.get("/api/user/check").handler(this::checkTokenHandler);     //检查校验token
-
         router.get("/api/banner").handler(this::bannerHandler);       //获取banner信息
         router.get("/api/category").handler(this::categoryHandler);     //获取category信息
         router.post("/api/commodity/search").handler(this::searchHandler);     //搜索商品信息
@@ -64,13 +63,11 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.post("/api/commodity/specifition/price/:id").handler(this::findCommoditySpecifitionPriceHandler);     //查询商品价格
         router.post("/api/commodity/price/:id").handler(this::findCommodityPriceHandler);     //查询商品价格
         router.get("/api/coupons").handler(this::couponHandler);     //代金券信息列表
+        router.get("/api/cart/num").handler(this::rowNumCartHandler);     //购物车数量
 
         router.getDelegate().route().handler(ShopUserSessionHandler.create(vertx.getDelegate(), this.config()));
 
         // API route handler    需要登录
-        /**
-         * 收货地址
-         */
         router.post("/api/insertAddress").handler(this::insertAddressHandler);      //新增收货地址
         router.put("/api/updateAddress").handler(this::updateAddressHandler);      //修改收货地址
         router.get("/api/addressList").handler(this::addressListHandler);        //收货地址列表
@@ -78,27 +75,18 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.put("/api/delAddress/:id").handler(this::addressDelHandler);      //删除收货地址
         router.get("/api/defaultAddress").handler(this::defaultAddressHandler);       //默认收货地址详情
         router.put("/api/updateDefaultAddress/:id").handler(this::updateDefaultAddressHandler);       //修改默认收货地址详情
-        /**
-         * 购物车
-         */
         router.post("/api/insertCart").handler(this::insertCartHandler);      //新增购物车
         router.get("/api/cartList").handler(this::cartListHandler);        //购物车列表
         router.get("/api/findCart").handler(this::findCartHandler);        //购物车列表
         router.put("/api/delCart/:id").handler(this::cartDelHandler);      //删除收货地址
         router.put("/api/delBatchCart").handler(this::cartDelBatchHandler);      //批量删除收货地址
-        /**
-         * 代金券
-         */
         router.put("/api/coupon/fetch/:id").handler(this::fetchCouponHandler);     //代金券信息列表
         router.get("/api/findCoupon").handler(this::findCouponHandler);     //可用代金券信息列表
-
-        /**
-         * 订单
-         */
+        router.get("/api/findCouponStatus").handler(this::findCouponStatusHandler);     //状态代金券信息列表
+        router.get("/api/coupon/num").handler(this::rowNumCouponHandler);     //可用代金券数量
         router.put("/api/order/insert").handler(this::insertOrderHandler);     //订单
         router.get("/api/order/list").handler(this::orderPageHandler);     //分页订单列表
         router.get("/api/order/detail/:id").handler(this::orderDetailHandler);     //查询订单详情
-
         router.get("/api/browse/list").handler(this::browsePageHandler);    //分页查询浏览记录
         router.get("/api/browse/num").handler(this::rowNumBrowseHistoryHandler);    //浏览商品记录数
         router.get("/api/collect/list").handler(this::collectPageHandler);    //分页查询收藏记录
@@ -491,6 +479,22 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
     }
 
     /**
+     * 购物车数量
+     * @param context
+     */
+    private void rowNumCartHandler(RoutingContext context){
+        cartHandler.rowNumCart(context.request().getHeader("token"), hander -> {
+            if(hander.failed()){
+                LOGGER.info("获取购物车数量失败:", hander.cause());
+                this.returnWithFailureMessage(context, "获取购物车数量失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "获取购物车数量成功", hander.result());
+            return;
+        });
+    }
+
+    /**
      * 获取代金券信息列表
      * @param context
      */
@@ -537,6 +541,40 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
             this.returnWithSuccessMessage(context, "获取可用代金券列表成功", hander.result());
             return;
         });
+    }
+
+    /**
+     * 可用代金券列表
+     * @param context
+     */
+    private void findCouponStatusHandler(RoutingContext context){
+        couponHandler.findCouponStatus(context.request().getHeader("token"),
+                Integer.parseInt(context.request().getParam("status")),
+                hander -> {
+            if(hander.failed()){
+                LOGGER.info("获取可用代金券列表失败:", hander.cause());
+                this.returnWithFailureMessage(context, "获取可用代金券列表失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "获取可用代金券列表成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 可用代金券数量
+     * @param context
+     */
+    private void rowNumCouponHandler(RoutingContext context){
+        couponHandler.rowNumCoupon(context.request().getHeader("token"), hander -> {
+                    if(hander.failed()){
+                        LOGGER.info("获取可用代金券数量失败:", hander.cause());
+                        this.returnWithFailureMessage(context, "获取可用代金券数量失败");
+                        return;
+                    }
+                    this.returnWithSuccessMessage(context, "获取可用代金券数量成功", hander.result());
+                    return;
+                });
     }
 
     /**
@@ -625,24 +663,6 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
                 return;
             }
             this.returnWithSuccessMessage(context, "查询商品收藏记录成功", hander.result());
-            return;
-        });
-    }
-
-    /**
-     * 更新商品收藏记录
-     * @param context
-     */
-    private void insertCollectHandler(RoutingContext context){
-        int page = Integer.parseInt(context.request().getParam("page"));
-        int pageSize = Integer.parseInt(context.request().getParam("pageSize"));
-        commodityHistoryHandler.findCollectHistory(context.request().getHeader("token"), page, pageSize, hander -> {
-            if(hander.failed()){
-                LOGGER.info("更新商品收藏记录失败:", hander.cause());
-                this.returnWithFailureMessage(context, "更新商品收藏记录失败");
-                return;
-            }
-            this.returnWithSuccessMessage(context, "更新商品收藏记录成功", hander.result());
             return;
         });
     }

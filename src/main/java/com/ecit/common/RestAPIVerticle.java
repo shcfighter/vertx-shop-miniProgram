@@ -380,8 +380,10 @@ public abstract class RestAPIVerticle extends BaseMicroserviceVerticle {
   protected void globalVerticle(Router router){
     router.route().last().handler(context -> {
       this.returnWithFailureMessage(context, "404");
+	  return ;
     }).failureHandler(context -> {
       this.returnWithFailureMessage(context, "服务器异常");
+	  return ;
     });
   }
 }

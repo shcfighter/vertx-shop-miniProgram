@@ -2,6 +2,7 @@ package com.ecit.shop.handler.impl;
 
 import com.ecit.common.IdBuilder;
 import com.ecit.common.db.JdbcRxRepositoryWrapper;
+import com.ecit.common.utils.JsonUtils;
 import com.ecit.common.utils.MustacheUtils;
 import com.ecit.shop.constants.CartSql;
 import com.ecit.shop.handler.ICartHandler;
@@ -117,6 +118,23 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
             this.execute(condition,
                     MustacheUtils.mustacheString(CartSql.BATCH_DELETE_CART_SQL, map))
                     .subscribe(resultFuture::complete, resultFuture::fail);
+            return resultFuture;
+        }).setHandler(handler);
+        return this;
+    }
+
+    @Override
+    public ICartHandler rowNumCart(String token, Handler<AsyncResult<Integer>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            if(JsonUtils.isNull(session)){
+                return Future.succeededFuture(0);
+            }
+            long userId = session.getLong("user_id");
+            Future<Integer> resultFuture = Future.future();
+            this.retrieveOne(new JsonArray().add(userId), CartSql.SELECT_ROWNUM_CART_SQL).subscribe(re -> {
+                resultFuture.complete(re.getInteger("row_num"));
+            }, resultFuture::fail);
             return resultFuture;
         }).setHandler(handler);
         return this;

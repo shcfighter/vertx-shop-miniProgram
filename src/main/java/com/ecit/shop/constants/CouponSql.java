@@ -41,6 +41,16 @@ public interface CouponSql {
     String SELECT_COUPON_DETAIL_USERID_SQL = "select coupon_detail_id::text, coupon_name, coupon_amount::numeric, begin_time, end_time, min_use_amount::numeric, versions from t_coupon_detail where user_id = ? and begin_time <= ? and end_time >= ? and is_deleted = 0 and is_use = 0 ";
 
     /**
+     * 可用代金券数量
+     */
+    String SELECT_COUPON_DETAIL_ROWNUM_SQL = "select count(1) row_num from t_coupon_detail where user_id = ? and begin_time <= ? and end_time >= ? and is_deleted = 0 and is_use = 0 ";
+
+    /**
+     * 根据用户、代金券状态查询代金券
+     */
+    String SELECT_COUPON_DETAIL_USERID_STATUS_SQL = "select coupon_detail_id::text, coupon_name, coupon_amount::numeric, begin_time, end_time, min_use_amount::numeric, versions from t_coupon_detail where user_id = ? and is_use = ? and begin_time <= ? and end_time >= ? and is_deleted = 0";
+
+    /**
      * 使用代金券
      */
     String UPDATE_COUPON_USER_SQL = "update t_coupon_detail set is_use = 1, versions = (versions + 1), update_time = now() where coupon_detail_id = ? and user_id = ? and is_use = 0 and is_deleted = 0";

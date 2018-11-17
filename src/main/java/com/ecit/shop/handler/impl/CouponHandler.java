@@ -125,5 +125,46 @@ public class CouponHandler extends JdbcRxRepositoryWrapper implements ICouponHan
         return this;
     }
 
+    /**
+     * 可用代金券数量
+     * @param token
+     * @param handler
+     * @return
+     */
+    @Override
+    public ICouponHandler rowNumCoupon(String token, Handler<AsyncResult<Integer>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<Integer> future = Future.future();
+            this.retrieveOne(new JsonArray().add(userId).add(System.currentTimeMillis()).add(System.currentTimeMillis()), CouponSql.SELECT_COUPON_DETAIL_ROWNUM_SQL)
+                    .subscribe(re -> {
+                        future.complete(re.getInteger("row_num"));
+                    }, future::fail);
+            return future;
+        }).setHandler(handler);
+        return this;
+    }
+
+    /**
+     * 可用代金券列表
+     * @param token
+     * @param handler
+     * @return
+     */
+    @Override
+    public ICouponHandler findCouponStatus(String token, Integer status, Handler<AsyncResult<List<JsonObject>>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<List<JsonObject>> future = Future.future();
+            this.retrieveMany(new JsonArray().add(userId).add(status).add(System.currentTimeMillis())
+                    .add(System.currentTimeMillis()), CouponSql.SELECT_COUPON_DETAIL_USERID_STATUS_SQL)
+                    .subscribe(future::complete, future::fail);
+            return future;
+        }).setHandler(handler);
+        return this;
+    }
+
 
 }

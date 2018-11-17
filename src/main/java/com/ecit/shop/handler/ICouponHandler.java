@@ -25,4 +25,10 @@ public interface ICouponHandler {
     @Fluent
     ICouponHandler findCoupon(String token, Handler<AsyncResult<List<JsonObject>>> handler);
 
+    @Fluent
+    ICouponHandler rowNumCoupon(String token, Handler<AsyncResult<Integer>> handler);
+
+    @Fluent
+    ICouponHandler findCouponStatus(String token, Integer status, Handler<AsyncResult<List<JsonObject>>> handler);
+
 }

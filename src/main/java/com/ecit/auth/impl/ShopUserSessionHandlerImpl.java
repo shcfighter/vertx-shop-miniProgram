@@ -48,5 +48,6 @@ public class ShopUserSessionHandlerImpl extends JdbcRxRepositoryWrapper implemen
         routingContext.response().setStatusCode(401)
                 .putHeader("content-type", "application/json")
                 .end(ResultItems.getEncodePrettily(ResultItems.getReturnItemsFailure("no_auth")));
+		return ;
     }
 }
