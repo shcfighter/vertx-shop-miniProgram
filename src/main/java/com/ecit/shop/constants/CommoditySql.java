@@ -33,5 +33,5 @@ public interface CommoditySql {
     /**
      * 根据商品id查询
      */
-    String SELECT_COMMODITY_BY_ID_SQL = "select * from t_commodity where commodity_id = ? and is_deleted = 0";
+    String SELECT_COMMODITY_BY_ID_SQL = "select commodity_id::text, commodity_name, brand_id, brand_name, category_id, category_name, price, original_price::numeric, num, freeze_num, status, image_url, freight_price::numeric, is_deleted, create_time, update_time, description, remarks, versions from t_commodity where commodity_id = ? and is_deleted = 0";
 }
