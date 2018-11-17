@@ -54,7 +54,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         // body handler
         router.route().handler(BodyHandler.create());
         //不需要登录
-        router.get("/api/accredit").handler(this::accreditHandler);     //微信授权
+        router.put("/api/accredit").handler(this::accreditHandler);     //微信授权
         router.get("/api/user/check").handler(this::checkTokenHandler);     //检查校验token
         router.get("/api/banner").handler(this::bannerHandler);       //获取banner信息
         router.get("/api/category").handler(this::categoryHandler);     //获取category信息
@@ -115,7 +115,8 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      * @param context
      */
     private void accreditHandler(RoutingContext context){
-        userHandler.accredit(context.request().getParam("code"), handler -> {
+        final JsonObject params = context.getBodyAsJson();
+        userHandler.accredit(params.getString("code"), params.getJsonObject("user_info"), handler -> {
             if(handler.failed()){
                 LOGGER.info("授权结果：", handler.cause());
                 this.returnWithFailureMessage(context, "授权失败");

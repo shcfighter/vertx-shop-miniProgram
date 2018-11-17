@@ -43,7 +43,7 @@ public class UserHandler extends JdbcRxRepositoryWrapper implements IUserHandler
      * @return
      */
     @Override
-    public IUserHandler accredit(String code, Handler<AsyncResult<JsonObject>> handler) {
+    public IUserHandler accredit(String code, JsonObject userInfo, Handler<AsyncResult<JsonObject>> handler) {
         Future<JsonObject> future = Future.future();
         webClient.get(443, "api.weixin.qq.com", "/sns/jscode2session")
                 .ssl(true)
@@ -64,6 +64,7 @@ public class UserHandler extends JdbcRxRepositoryWrapper implements IUserHandler
             }
             final String openid = json.getString("openid");
             final String sessionKey = json.getString("session_key");
+            System.out.println(userInfo);
             Future<JsonObject> userFuture = Future.future();
             this.retrieveOne(new JsonArray().add(openid), UserSql.SELECT_BY_OPENID_SQL)
                     .subscribe(userFuture::complete, userFuture::fail);
@@ -76,8 +77,11 @@ public class UserHandler extends JdbcRxRepositoryWrapper implements IUserHandler
                     this.executeNoResult(new JsonArray().add(token).add(userId).add(user.getLong("versions")), UserSql.UPDATE_USER_TOKEN_SQL).subscribe();
                 } else {
                     userId = IdBuilder.getUniqueId();
-                    this.execute(new JsonArray().add(userId).add(openid).add(token).add(UserStatusEnum.ACTIVATION.getStatus()),
+                    this.execute(new JsonArray().add(userId).add(openid).add(userInfo.getString("nickName")).add(token).add(UserStatusEnum.ACTIVATION.getStatus()),
                             UserSql.INSERT_USER_BY_OPENID_SQL).subscribe();
+                    this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(userInfo.getString("avatarUrl"))
+                            .add(userInfo.getInteger("gender")).add(userInfo.getString("province"))
+                            .add(userInfo.getString("city")).add(userInfo.getString("country")), UserSql.INSERT_USER_INFO_SQL).subscribe();
                 }
                 userSession.put("user_id", userId);
                 this.setSession(token, userSession);

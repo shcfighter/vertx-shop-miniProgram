@@ -18,7 +18,7 @@ public interface UserSql {
     /**
      * 通过微信openid新增用户
      */
-    String INSERT_USER_BY_OPENID_SQL = "insert into t_user(user_id, open_id, token, status, is_deleted, create_time, versions) values(?, ?, ?, ?, 0, now(), 0)";
+    String INSERT_USER_BY_OPENID_SQL = "insert into t_user(user_id, open_id, login_name, token, status, is_deleted, create_time, versions) values(?, ?, ?, ?, ?, 0, now(), 0)";
 
     /**
      * 修改用户的token信息
@@ -30,5 +30,8 @@ public interface UserSql {
      */
     String CHECK_USER_TOKEN_SQL = "select count(1) num from t_user where token = ? and is_deleted = 0";
 
-
+    /**
+     * 新增用户详情
+     */
+    String INSERT_USER_INFO_SQL = "insert into t_user_info(user_info_id, user_id, avatarUrl, sex, province, city, country, create_time) values(?, ?, ?, ?, ?, ?, ?, now())";
 }

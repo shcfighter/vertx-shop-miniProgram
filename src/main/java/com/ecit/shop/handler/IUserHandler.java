@@ -15,7 +15,7 @@ import io.vertx.core.json.JsonObject;
 public interface IUserHandler {
 
     @Fluent
-    IUserHandler accredit(String code, Handler<AsyncResult<JsonObject>> handler);
+    IUserHandler accredit(String code, JsonObject userInfo, Handler<AsyncResult<JsonObject>> handler);
 
     @Fluent
     IUserHandler checkToken(String token, Handler<AsyncResult<Boolean>> handler);
