@@ -24,4 +24,7 @@ public interface IOrderHandler {
 
     @Fluent
     IOrderHandler orderDetail(String token, long orderId, Handler<AsyncResult<JsonObject>> handler);
+
+    @Fluent
+    IOrderHandler cancelOrder(String token, long orderId, Handler<AsyncResult<Integer>> handler);
 }

@@ -173,6 +173,33 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
         return this;
     }
 
+    @Override
+    public IOrderHandler cancelOrder(String token, long orderId, Handler<AsyncResult<Integer>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<JsonObject> orderFuture = Future.future();
+            this.retrieveOne(new JsonArray().add(orderId).add(userId), OrderSql.SELECT_ORDER_BY_ID_SQL)
+                    .subscribe(orderFuture::complete, orderFuture::fail);
+            return orderFuture.compose(order -> {
+                if(JsonUtils.isNull(order)){
+                    return Future.succeededFuture(-1);
+                }
+                int status = order.getInteger("order_status");
+                if(OrderStatusEnum.CANCEL.getValue() == status ||
+                        OrderStatusEnum.AUDIT_REFUND.getValue() == status ||
+                        OrderStatusEnum.REFUND.getValue() == status){
+                    return Future.succeededFuture(-1);
+                }
+                Future<Integer> future = Future.future();
+                this.execute(new JsonArray().add(userId).add(order.getLong("order_id")).add(order.getLong("versions")),
+                        OrderSql.UPDATE_REFUND_ORDER_SQL).subscribe(future::complete, future::fail);
+                return future;
+            });
+        }).setHandler(handler);
+        return this;
+    }
+
     /**
      * 检查商品数量是否足够
      * @param orderDetails

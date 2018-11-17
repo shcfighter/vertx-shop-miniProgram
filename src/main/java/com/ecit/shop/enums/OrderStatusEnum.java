@@ -25,13 +25,13 @@ public enum OrderStatusEnum {
      */
     EVALUATION(5, "评价"),
     /**
-     * 6=已退款
+     * 6=申请退款退货
      */
-    REFUND(6, "已退款"),
+    AUDIT_REFUND(6, "申请退款退货"),
     /**
-     * 7=申请退款退货
+     * 7=已退款
      */
-    AUDIT_REFUND(7, "申请退款退货"),
+    REFUND(7, "已退款"),
     /**
      * -1=已取消订单
      */

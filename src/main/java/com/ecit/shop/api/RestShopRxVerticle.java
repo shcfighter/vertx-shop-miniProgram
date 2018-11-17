@@ -84,9 +84,10 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.get("/api/findCoupon").handler(this::findCouponHandler);     //可用代金券信息列表
         router.get("/api/findCouponStatus").handler(this::findCouponStatusHandler);     //状态代金券信息列表
         router.get("/api/coupon/num").handler(this::rowNumCouponHandler);     //可用代金券数量
-        router.put("/api/order/insert").handler(this::insertOrderHandler);     //订单
+        router.put("/api/order/insert").handler(this::insertOrderHandler);     //下单
         router.get("/api/order/list").handler(this::orderPageHandler);     //分页订单列表
         router.get("/api/order/detail/:id").handler(this::orderDetailHandler);     //查询订单详情
+        router.put("/api/order/cancel/:id").handler(this::orderCancelHandler);     //取消订单
         router.get("/api/browse/list").handler(this::browsePageHandler);    //分页查询浏览记录
         router.get("/api/browse/num").handler(this::rowNumBrowseHistoryHandler);    //浏览商品记录数
         router.get("/api/collect/list").handler(this::collectPageHandler);    //分页查询收藏记录
@@ -628,6 +629,23 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
             JsonObject order = hander.result();
             order.put("order_details", new JsonArray(order.getString("order_details")));
             this.returnWithSuccessMessage(context, "查询订单详情成功", order);
+            return;
+        });
+    }
+
+    /**
+     * 取消订单
+     * @param context
+     */
+    private void orderCancelHandler(RoutingContext context){
+        orderHandler.cancelOrder(context.request().getHeader("token"), Long.parseLong(context.pathParam("id")),
+                hander -> {
+            if(hander.failed()){
+                LOGGER.info("取消订单失败:", hander.cause());
+                this.returnWithFailureMessage(context, "取消订单失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "取消订单成功", hander.result());
             return;
         });
     }

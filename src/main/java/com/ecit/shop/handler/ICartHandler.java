@@ -32,5 +32,5 @@ public interface ICartHandler {
     ICartHandler delBatchCart(String token, JsonObject params, Handler<AsyncResult<Integer>> handler);
 
     @Fluent
-    ICartHandler rowNumCart(String token, Handler<AsyncResult<Integer>> handler);
+    ICartHandler rowNumCart(String token, Handler<AsyncResult<Long>> handler);
 }

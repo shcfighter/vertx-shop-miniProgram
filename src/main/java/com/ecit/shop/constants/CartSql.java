@@ -43,5 +43,5 @@ public interface CartSql {
     /**
      *  购物车数量
      */
-    String SELECT_ROWNUM_CART_SQL = "select count(1) row_num from t_cart where user_id = ? and is_deleted = 0";
+    String SELECT_ROWNUM_CART_SQL = "select sum(num) row_num from t_cart where user_id = ? and is_deleted = 0";
 }

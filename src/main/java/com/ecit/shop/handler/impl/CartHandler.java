@@ -124,16 +124,16 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
     }
 
     @Override
-    public ICartHandler rowNumCart(String token, Handler<AsyncResult<Integer>> handler) {
+    public ICartHandler rowNumCart(String token, Handler<AsyncResult<Long>> handler) {
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
             if(JsonUtils.isNull(session)){
-                return Future.succeededFuture(0);
+                return Future.succeededFuture(0L);
             }
             long userId = session.getLong("user_id");
-            Future<Integer> resultFuture = Future.future();
+            Future<Long> resultFuture = Future.future();
             this.retrieveOne(new JsonArray().add(userId), CartSql.SELECT_ROWNUM_CART_SQL).subscribe(re -> {
-                resultFuture.complete(re.getInteger("row_num"));
+                resultFuture.complete(Long.parseLong(re.getString("row_num")));
             }, resultFuture::fail);
             return resultFuture;
         }).setHandler(handler);
