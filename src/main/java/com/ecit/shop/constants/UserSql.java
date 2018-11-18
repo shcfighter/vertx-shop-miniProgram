@@ -34,4 +34,14 @@ public interface UserSql {
      * 新增用户详情
      */
     String INSERT_USER_INFO_SQL = "insert into t_user_info(user_info_id, user_id, avatar_url, sex, province, city, country, create_time) values(?, ?, ?, ?, ?, ?, ?, now())";
+
+    /**
+     * 查询用户信息
+     */
+    String SELECT_USER_SQL = "select * from t_user where user_id = ? and status = 1 and is_deleted = 0";
+
+    /**
+     * 更新手机号码
+     */
+    String UPDATE_MOBILE_SQL = "update t_user set mobile = ?, update_time = now(), versions = (versions + 1) where user_id = ? and versions = ?";
 }

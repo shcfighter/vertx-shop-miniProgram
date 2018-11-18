@@ -70,6 +70,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.getDelegate().route().handler(ShopUserSessionHandler.create(vertx.getDelegate(), this.config()));
 
         // API route handler    需要登录
+        router.put("/api/user/mobile").handler(this::updateMobileHandler);      //更改手机号码
         router.post("/api/insertAddress").handler(this::insertAddressHandler);      //新增收货地址
         router.put("/api/updateAddress").handler(this::updateAddressHandler);      //修改收货地址
         router.get("/api/addressList").handler(this::addressListHandler);        //收货地址列表
@@ -152,6 +153,23 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
             }
             this.returnWithSuccessMessage(context, "授权成功");
             return;
+        });
+    }
+
+    /**
+     * 更改手机号码
+     * @param context
+     */
+    private void updateMobileHandler(RoutingContext context){
+        JsonObject params = context.getBodyAsJson();
+        userHandler.updateMobile(context.request().getHeader("token"), params.getString("mobile"), hander -> {
+            if(hander.failed() || hander.result() <= 0){
+                LOGGER.info("更改手机号码失败：", hander.cause());
+                this.returnWithFailureMessage(context, "更改手机号码失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "更改手机号码成功");
+            return ;
         });
     }
 

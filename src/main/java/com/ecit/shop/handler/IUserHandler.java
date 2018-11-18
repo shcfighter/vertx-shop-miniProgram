@@ -20,4 +20,6 @@ public interface IUserHandler {
     @Fluent
     IUserHandler checkToken(String token, Handler<AsyncResult<Boolean>> handler);
 
+    @Fluent
+    IUserHandler updateMobile(String token, String mobile, Handler<AsyncResult<Integer>> handler);
 }

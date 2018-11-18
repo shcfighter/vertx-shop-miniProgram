@@ -2,6 +2,7 @@ package com.ecit.shop.handler.impl;
 
 import com.ecit.common.IdBuilder;
 import com.ecit.common.db.JdbcRxRepositoryWrapper;
+import com.ecit.common.utils.JsonUtils;
 import com.ecit.shop.constants.IntegrationSql;
 import com.ecit.shop.constants.UserSql;
 import com.ecit.shop.enums.ErrcodeEnum;
@@ -65,7 +66,6 @@ public class UserHandler extends JdbcRxRepositoryWrapper implements IUserHandler
             }
             final String openid = json.getString("openid");
             final String sessionKey = json.getString("session_key");
-            System.out.println(userInfo);
             Future<JsonObject> userFuture = Future.future();
             this.retrieveOne(new JsonArray().add(openid), UserSql.SELECT_BY_OPENID_SQL)
                     .subscribe(userFuture::complete, userFuture::fail);
@@ -99,6 +99,25 @@ public class UserHandler extends JdbcRxRepositoryWrapper implements IUserHandler
         this.retrieveOne(new JsonArray().add(token), UserSql.CHECK_USER_TOKEN_SQL)
                 .subscribe(result -> future.complete(result.getInteger("num") > 0 ? true : false), future::fail);
         future.setHandler(handler);
+        return this;
+    }
+
+    @Override
+    public IUserHandler updateMobile(String token, String mobile, Handler<AsyncResult<Integer>> handler) {
+        Future<JsonObject> sessionFuture = this.getSession(token);
+        sessionFuture.compose(session -> {
+            long userId = session.getLong("user_id");
+            Future<JsonObject> userFuture = Future.future();
+            this.retrieveOne(new JsonArray().add(userId), UserSql.SELECT_USER_SQL).subscribe(userFuture::complete, userFuture::fail);
+            return userFuture.compose(user -> {
+               if(JsonUtils.isNull(user)){
+                   return Future.failedFuture("用户不存在");
+               }
+               Future<Integer> future = Future.future();
+               this.execute(new JsonArray().add(mobile).add(userId).add(user.getLong("versions")), UserSql.UPDATE_MOBILE_SQL).subscribe(future::complete, future::fail);
+               return future;
+            });
+        }).setHandler(handler);
         return this;
     }
 
