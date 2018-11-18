@@ -105,7 +105,7 @@ public class CommodityHistoryHandler extends JdbcRxRepositoryWrapper implements 
                        if(JsonUtils.isNull(commodity)){
                            return Future.failedFuture("商品不存在");
                        }
-                       JsonObject document = new JsonObject().put("commodity", commodity.encodePrettily()).put("commodity_id", commodity.getLong("commodity_id")).put("user_id", userId).put("is_deleted", 0).put("create_time", System.currentTimeMillis());
+                       JsonObject document = new JsonObject().put("commodity", commodity.encodePrettily()).put("commodity_id", commodity.getString("commodity_id")).put("user_id", userId).put("is_deleted", 0).put("create_time", System.currentTimeMillis());
                        mongoClient.rxInsert(Constants.MONGO_COLLECTION_COMDITIDY_COLLECT, document).subscribe();
                        return Future.succeededFuture(0);
                    });

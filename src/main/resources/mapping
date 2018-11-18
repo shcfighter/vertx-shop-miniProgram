@@ -14,20 +14,20 @@
       "commodity": {
          "properties": {
             "commodity_id": {
-               "type": "long"
+               "type": "keyword"
             },
             "commodity_name": {
 		        "analyzer": "ik_smart",
                "type": "text"
             },
             "brand_id": {
-               "type": "long"
+               "type": "keyword"
             },
             "brand_name": {
                "type": "keyword"
             },
             "category_id": {
-               "type": "long"
+               "type": "keyword"
             },
             "category_name": {
                "type": "keyword"

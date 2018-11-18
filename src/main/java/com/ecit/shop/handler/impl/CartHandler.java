@@ -34,18 +34,18 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
         sessionFuture.compose(session -> {
             final long userId = session.getLong("user_id");
             Future<JsonObject> cartFuture = Future.future();
-            this.retrieveOne(new JsonArray().add(userId).add(params.getLong("commodity_id")).add(params.getString("specifition_name")),
+            this.retrieveOne(new JsonArray().add(userId).add(params.getString("commodity_id")).add(params.getString("specifition_name")),
                     CartSql.SELECT_CART_BY_SPECIFITION_SQL).subscribe(cartFuture::complete, cartFuture::fail);
             return cartFuture.compose(cart -> {
                 Future<Integer> resultFuture = Future.future();
                 if(Objects.isNull(cart) || cart.isEmpty()){
-                    this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(params.getLong("commodity_id"))
+                    this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(params.getString("commodity_id"))
                             .add(params.getString("commodity_name")).add(params.getInteger("num")).add(params.getString("price"))
                             .add(params.getString("image_url")).add(params.getString("specifition_name")).add(params.getString("freight_price")),
                             CartSql.INSERT_CART_SQL).subscribe(resultFuture::complete, resultFuture::fail);
                 }else{
                     this.execute(new JsonArray().add(params.getInteger("num")).add(params.getString("price")).add(userId)
-                            .add(params.getLong("commodity_id")).add(params.getString("specifition_name"))
+                            .add(params.getString("commodity_id")).add(params.getString("specifition_name"))
                             .add(cart.getLong("versions")), CartSql.UPDAT_CART_NUM_SQL).
                             subscribe(resultFuture::complete, resultFuture::fail);
                 }
