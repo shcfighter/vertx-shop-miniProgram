@@ -133,7 +133,7 @@ public class CartHandler extends JdbcRxRepositoryWrapper implements ICartHandler
             long userId = session.getLong("user_id");
             Future<Long> resultFuture = Future.future();
             this.retrieveOne(new JsonArray().add(userId), CartSql.SELECT_ROWNUM_CART_SQL).subscribe(re -> {
-                resultFuture.complete(Long.parseLong(re.getString("row_num")));
+                resultFuture.complete(StringUtils.isNotEmpty(re.getString("row_num")) ? Long.parseLong(re.getString("row_num")) : 0L);
             }, resultFuture::fail);
             return resultFuture;
         }).setHandler(handler);

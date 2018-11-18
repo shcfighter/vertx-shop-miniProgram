@@ -33,5 +33,5 @@ public interface UserSql {
     /**
      * 新增用户详情
      */
-    String INSERT_USER_INFO_SQL = "insert into t_user_info(user_info_id, user_id, avatarUrl, sex, province, city, country, create_time) values(?, ?, ?, ?, ?, ?, ?, now())";
+    String INSERT_USER_INFO_SQL = "insert into t_user_info(user_info_id, user_id, avatar_url, sex, province, city, country, create_time) values(?, ?, ?, ?, ?, ?, ?, now())";
 }

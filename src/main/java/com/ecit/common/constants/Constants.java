@@ -29,4 +29,9 @@ public class Constants {
      * mongodb 商品收藏记录collection
      */
     public static final String MONGO_COLLECTION_COMDITIDY_COLLECT = "miniprogram_comditidy_collect";
+
+    /**
+     * 每日签到key
+     */
+    public static final String SIGN_IN_KEY = "sign_in_key_";
 }

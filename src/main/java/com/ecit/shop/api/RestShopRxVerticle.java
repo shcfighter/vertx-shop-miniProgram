@@ -34,6 +34,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
     private ICouponHandler couponHandler;
     private IOrderHandler orderHandler;
     private ICommodityHistoryHandler commodityHistoryHandler;
+    private IIntegrationHandler integrationHandler;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -46,6 +47,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         this.couponHandler = new CouponHandler(vertx, this.config());
         this.orderHandler = new OrderHandler(vertx, this.config());
         this.commodityHistoryHandler = new CommodityHistoryHandler(vertx, this.config());
+        this.integrationHandler = new IntegrationHandler(vertx, this.config());
 
         final Router router = Router.router(vertx);
         // cookie and session handler
@@ -94,6 +96,8 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
         router.get("/api/collect/findCommodity/:id").handler(this::findCommodityHandler);    //查询收藏记录
         router.put("/api/collect/:id").handler(this::insertCollectHistoryHandler);    //收藏商品记录
         router.get("/api/collect/num").handler(this::rowNumCollectHistoryHandler);    //收藏商品记录数
+        router.get("/api/integration/num").handler(this::rowNumIntegrationHandler);    //积分数
+        router.put("/api/signIn").handler(this::signInHandler);    //签到
 
 
         //全局异常处理
@@ -753,4 +757,37 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
             return;
         });
     }
+
+    /**
+     * 获取积分数
+     * @param context
+     */
+    private void rowNumIntegrationHandler(RoutingContext context){
+        integrationHandler.integrationRowNum(context.request().getHeader("token"), hander -> {
+            if(hander.failed()){
+                LOGGER.info("获取积分数失败:", hander.cause());
+                this.returnWithFailureMessage(context, "获取积分数失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "获取积分数成功", hander.result());
+            return;
+        });
+    }
+
+    /**
+     * 签到
+     * @param context
+     */
+    private void signInHandler(RoutingContext context){
+        integrationHandler.signIn(context.request().getHeader("token"), hander -> {
+            if(hander.failed()){
+                LOGGER.info("签到失败:", hander.cause());
+                this.returnWithFailureMessage(context, "签到失败");
+                return;
+            }
+            this.returnWithSuccessMessage(context, "签到成功", hander.result());
+            return;
+        });
+    }
+
 }

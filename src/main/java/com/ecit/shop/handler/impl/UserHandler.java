@@ -2,6 +2,7 @@ package com.ecit.shop.handler.impl;
 
 import com.ecit.common.IdBuilder;
 import com.ecit.common.db.JdbcRxRepositoryWrapper;
+import com.ecit.shop.constants.IntegrationSql;
 import com.ecit.shop.constants.UserSql;
 import com.ecit.shop.enums.ErrcodeEnum;
 import com.ecit.shop.enums.UserStatusEnum;
@@ -82,6 +83,7 @@ public class UserHandler extends JdbcRxRepositoryWrapper implements IUserHandler
                     this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(userInfo.getString("avatarUrl"))
                             .add(userInfo.getInteger("gender")).add(userInfo.getString("province"))
                             .add(userInfo.getString("city")).add(userInfo.getString("country")), UserSql.INSERT_USER_INFO_SQL).subscribe();
+                    this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(5L), IntegrationSql.INSERT_INTEGRATION_SQL).subscribe();
                 }
                 userSession.put("user_id", userId);
                 this.setSession(token, userSession);
