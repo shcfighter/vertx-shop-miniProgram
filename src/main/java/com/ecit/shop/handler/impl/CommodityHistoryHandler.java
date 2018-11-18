@@ -43,18 +43,18 @@ public class CommodityHistoryHandler extends JdbcRxRepositoryWrapper implements 
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
             long userId = session.getLong("user_id");
-            JsonObject document = new JsonObject().put("commodity", commodity).put("commodity_id", commodity.getLong("commodity_id"))
+            JsonObject document = new JsonObject().put("commodity", commodity).put("commodity_id", Long.parseLong(commodity.getString("commodity_id")))
                     .put("user_id", userId).put("is_deleted", 0).put("create_time", System.currentTimeMillis());
             Future<JsonObject> future = Future.future();
             mongoClient.rxFindOne(Constants.MONGO_COLLECTION_COMDITIDY_BROWSE, new JsonObject().put("user_id", userId)
-                    .put("commodity_id", commodity.getLong("commodity_id")), null).subscribe(future::complete, future::fail);
+                    .put("commodity_id", Long.parseLong(commodity.getString("commodity_id"))), null).subscribe(future::complete, future::fail);
             return future.compose(browse -> {
                 if(JsonUtils.isNull(browse)){
                     mongoClient.rxInsert(Constants.MONGO_COLLECTION_COMDITIDY_BROWSE, document).subscribe();
                     return Future.succeededFuture("1");
                 }
                 mongoClient.rxFindOneAndReplace(Constants.MONGO_COLLECTION_COMDITIDY_BROWSE, new JsonObject().put("user_id", userId)
-                        .put("commodity_id", commodity.getLong("commodity_id")), document).subscribe();
+                        .put("commodity_id", Long.parseLong(commodity.getString("commodity_id"))), document).subscribe();
                 return Future.succeededFuture("1");
             });
         }).setHandler(handler);
@@ -105,7 +105,8 @@ public class CommodityHistoryHandler extends JdbcRxRepositoryWrapper implements 
                        if(JsonUtils.isNull(commodity)){
                            return Future.failedFuture("商品不存在");
                        }
-                       JsonObject document = new JsonObject().put("commodity", commodity.encodePrettily()).put("commodity_id", commodity.getString("commodity_id")).put("user_id", userId).put("is_deleted", 0).put("create_time", System.currentTimeMillis());
+                       JsonObject document = new JsonObject().put("commodity", commodity.encodePrettily()).put("commodity_id", Long.parseLong(commodity.getString("commodity_id")))
+                               .put("user_id", userId).put("is_deleted", 0).put("create_time", System.currentTimeMillis());
                        mongoClient.rxInsert(Constants.MONGO_COLLECTION_COMDITIDY_COLLECT, document).subscribe();
                        return Future.succeededFuture(0);
                    });
