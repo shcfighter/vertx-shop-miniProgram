@@ -26,6 +26,7 @@
         <guava-version>27.0-jre</guava-version>
         <mustache.java.version>0.9.5</mustache.java.version>
         <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+        <bcprov.version>1.60</bcprov.version>
     </properties>
 
     <dependencyManagement>
@@ -163,6 +164,11 @@
             <groupId>com.github.spullara.mustache.java</groupId>
             <artifactId>compiler</artifactId>
             <version>${mustache.java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>${bcprov.version}</version>
         </dependency>
     </dependencies>
 

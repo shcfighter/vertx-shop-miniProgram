@@ -51,6 +51,7 @@ public class AddressHandler extends JdbcRxRepositoryWrapper implements IAddressH
                 Future<Integer> resultFuture = Future.future();
                 this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(params.getString("name")).add(params.getInteger("province_id"))
                         .add(params.getInteger("city_id")).add(Objects.isNull(params.getInteger("district_id")) ? 0 : params.getInteger("district_id"))
+                        .add(params.getString("province_value")).add(params.getString("city_value")).add(params.getString("district_value"))
                         .add(params.getString("address")).add(params.getString("mobile")).add(params.getString("code"))
                         .add(params.getInteger("is_default")), AddressSql.INSERT_ADDRESS_SQL).
                         subscribe(resultFuture::complete, resultFuture::fail);
@@ -75,6 +76,7 @@ public class AddressHandler extends JdbcRxRepositoryWrapper implements IAddressH
                 }
                 this.execute(new JsonArray().add(params.getString("name")).add(params.getInteger("province_id"))
                         .add(params.getInteger("city_id")).add(Objects.isNull(params.getInteger("district_id")) ? 0 : params.getInteger("district_id"))
+                        .add(params.getString("province_value")).add(params.getString("city_value")).add(params.getString("district_value"))
                         .add(params.getString("address")).add(params.getString("mobile")).add(params.getString("code")).add(params.getString("id"))
                         .add(address.getLong("versions")), AddressSql.UPDATE_ADDRESS_SQL).subscribe(resultFuture::complete, resultFuture::fail);
                 return resultFuture;

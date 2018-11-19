@@ -21,5 +21,5 @@ public interface IUserHandler {
     IUserHandler checkToken(String token, Handler<AsyncResult<Boolean>> handler);
 
     @Fluent
-    IUserHandler updateMobile(String token, String mobile, Handler<AsyncResult<Integer>> handler);
+    IUserHandler updateMobile(String token, JsonObject params, Handler<AsyncResult<Integer>> handler);
 }

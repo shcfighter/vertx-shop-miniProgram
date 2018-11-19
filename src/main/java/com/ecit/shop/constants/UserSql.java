@@ -18,12 +18,12 @@ public interface UserSql {
     /**
      * 通过微信openid新增用户
      */
-    String INSERT_USER_BY_OPENID_SQL = "insert into t_user(user_id, open_id, login_name, token, status, is_deleted, create_time, versions) values(?, ?, ?, ?, ?, 0, now(), 0)";
+    String INSERT_USER_BY_OPENID_SQL = "insert into t_user(user_id, open_id, login_name, token, session_key, status, is_deleted, create_time, versions) values(?, ?, ?, ?, ?, ?, 0, now(), 0)";
 
     /**
      * 修改用户的token信息
      */
-    String UPDATE_USER_TOKEN_SQL = "update t_user set token = ?, versions = (versions + 1) where user_id = ? and versions = ?";
+    String UPDATE_USER_TOKEN_SQL = "update t_user set token = ?, session_key = ?, versions = (versions + 1) where user_id = ? and versions = ?";
 
     /**
      * 判断token是否存在

@@ -3,6 +3,7 @@ package com.ecit.shop.handler.impl;
 import com.ecit.common.IdBuilder;
 import com.ecit.common.db.JdbcRxRepositoryWrapper;
 import com.ecit.common.utils.JsonUtils;
+import com.ecit.common.utils.WXUtils;
 import com.ecit.shop.constants.IntegrationSql;
 import com.ecit.shop.constants.UserSql;
 import com.ecit.shop.enums.ErrcodeEnum;
@@ -72,13 +73,13 @@ public class UserHandler extends JdbcRxRepositoryWrapper implements IUserHandler
             return userFuture.compose(user -> {
                 long userId;
                 final String token = MD5Util.toMD5String(StringUtils.join(openid, "_", sessionKey, "_", System.currentTimeMillis()));
-                JsonObject userSession = new JsonObject().put("open_id", openid).put("token", token);
-                if (Objects.nonNull(user) && !user.isEmpty()) {
+                JsonObject userSession = new JsonObject().put("open_id", openid).put("session_key", sessionKey).put("token", token);
+                if (!JsonUtils.isNull(user)) {
                     userId = user.getLong("user_id");
-                    this.executeNoResult(new JsonArray().add(token).add(userId).add(user.getLong("versions")), UserSql.UPDATE_USER_TOKEN_SQL).subscribe();
+                    this.executeNoResult(new JsonArray().add(token).add(sessionKey).add(userId).add(user.getLong("versions")), UserSql.UPDATE_USER_TOKEN_SQL).subscribe();
                 } else {
                     userId = IdBuilder.getUniqueId();
-                    this.execute(new JsonArray().add(userId).add(openid).add(userInfo.getString("nickName")).add(token).add(UserStatusEnum.ACTIVATION.getStatus()),
+                    this.execute(new JsonArray().add(userId).add(openid).add(userInfo.getString("nickName")).add(token).add(sessionKey).add(UserStatusEnum.ACTIVATION.getStatus()),
                             UserSql.INSERT_USER_BY_OPENID_SQL).subscribe();
                     this.execute(new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(userInfo.getString("avatarUrl"))
                             .add(userInfo.getInteger("gender")).add(userInfo.getString("province"))
@@ -103,7 +104,7 @@ public class UserHandler extends JdbcRxRepositoryWrapper implements IUserHandler
     }
 
     @Override
-    public IUserHandler updateMobile(String token, String mobile, Handler<AsyncResult<Integer>> handler) {
+    public IUserHandler updateMobile(String token, JsonObject params, Handler<AsyncResult<Integer>> handler) {
         Future<JsonObject> sessionFuture = this.getSession(token);
         sessionFuture.compose(session -> {
             long userId = session.getLong("user_id");
@@ -113,8 +114,10 @@ public class UserHandler extends JdbcRxRepositoryWrapper implements IUserHandler
                if(JsonUtils.isNull(user)){
                    return Future.failedFuture("用户不存在");
                }
+               JsonObject mobile = WXUtils.decrypt(params.getString("encryptedData"), session.getString("session_key"), params.getString("iv"));
+               System.out.println(mobile);
                Future<Integer> future = Future.future();
-               this.execute(new JsonArray().add(mobile).add(userId).add(user.getLong("versions")), UserSql.UPDATE_MOBILE_SQL).subscribe(future::complete, future::fail);
+               this.execute(new JsonArray().add(mobile.getString("phoneNumber")).add(userId).add(user.getLong("versions")), UserSql.UPDATE_MOBILE_SQL).subscribe(future::complete, future::fail);
                return future;
             });
         }).setHandler(handler);
