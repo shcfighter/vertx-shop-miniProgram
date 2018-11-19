@@ -162,7 +162,7 @@ public class RestShopRxVerticle extends RestAPIRxVerticle{
      */
     private void updateMobileHandler(RoutingContext context){
         JsonObject params = context.getBodyAsJson();
-        userHandler.updateMobile(context.request().getHeader("token"), params.getString("mobile"), hander -> {
+        userHandler.updateMobile(context.request().getHeader("token"), params, hander -> {
             if(hander.failed() || hander.result() <= 0){
                 LOGGER.info("更改手机号码失败：", hander.cause());
                 this.returnWithFailureMessage(context, "更改手机号码失败");
