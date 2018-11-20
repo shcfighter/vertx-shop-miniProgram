@@ -23,7 +23,7 @@ public interface OrderSql {
     /**
      * 根据id查询订单
      */
-    String SELECT_ORDER_BY_ID_SQL = "select order_id, country_id, province_id, city_id, district_id, address, mobile, postcode, create_time, order_details, total_price::numeric, order_status, coupon_price::numeric, pay_time, cancel_time, send_time, freight_price::numeric, actual_price::numeric, receiver, versions from t_order where order_id = ? and user_id = ? and is_deleted = 0";
+    String SELECT_ORDER_BY_ID_SQL = "select order_id, province_id, city_id, district_id, province_value, city_value, district_value, address, mobile, postcode, create_time, order_details, total_price::numeric, order_status, coupon_price::numeric, pay_time, cancel_time, send_time, freight_price::numeric, actual_price::numeric, receiver, versions from t_order where order_id = ? and user_id = ? and is_deleted = 0";
 
     /**
      * 取消订单
