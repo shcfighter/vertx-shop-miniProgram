@@ -113,9 +113,10 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
                                         .put("params", new JsonArray().add(params.getString("coupon_id")).add(userId)));
                                 //下单
                                 exec.add(new JsonObject().put("type", JdbcEnum.update.name()).put("sql", OrderSql.INSERT_ORDER_SQL)
-                                       .put("params", new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(address.getInteger("country_id"))
-                                               .add(address.getInteger("province_id")).add(address.getInteger("city_id"))
-                                               .add(address.getInteger("district_id")).add(address.getString("name")).add(address.getString("address"))
+                                       .put("params", new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(address.getInteger("province_id"))
+                                               .add(address.getInteger("city_id")).add(address.getInteger("district_id")).add(address.getString("province_value"))
+                                               .add(address.getString("city_value")).add(address.getString("district_value"))
+                                               .add(address.getString("name")).add(address.getString("address"))
                                                .add(address.getString("mobile")).add(address.getString("code")).add(orderDetails.encodePrettily())
                                                .add(totalPriceDecimal.toString()).add(OrderStatusEnum.VALID.getValue()).add(params.getString("coupon_id")).add(0)
                                                .add(freightPriceList.get(0).toString()).add(totalPriceDecimal.subtract(freightPriceList.get(0)).toString())
@@ -127,9 +128,10 @@ public class OrderHandler extends JdbcRxRepositoryWrapper implements IOrderHandl
                            //无代金券处理
                            //下单
                            exec.add(new JsonObject().put("type", JdbcEnum.update.name()).put("sql", OrderSql.INSERT_ORDER_SQL)
-                                   .put("params", new JsonArray().add(IdBuilder.getUniqueId()).add(userId).add(address.getInteger("country_id"))
-                                           .add(address.getInteger("province_id")).add(address.getInteger("city_id"))
-                                           .add(address.getInteger("district_id")).add(address.getString("name")).add(address.getString("address"))
+                                   .put("params", new JsonArray().add(IdBuilder.getUniqueId()).add(userId)
+                                           .add(address.getInteger("province_id")).add(address.getInteger("city_id")).add(address.getInteger("district_id"))
+                                           .add(address.getString("province_value")).add(address.getString("city_value")).add(address.getString("district_value"))
+                                           .add(address.getString("name")).add(address.getString("address"))
                                            .add(address.getString("mobile")).add(address.getString("code")).add(orderDetails.encodePrettily())
                                            .add(totalPriceDecimal.toString()).add(OrderStatusEnum.VALID.getValue()).add(0).add(0)
                                            .add(freightPriceList.get(0).toString()).add(totalPriceDecimal.toString()).add(params.getString("remarks"))));
