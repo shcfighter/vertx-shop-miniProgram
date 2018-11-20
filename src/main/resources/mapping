@@ -70,6 +70,9 @@
             "detail_image_url": {
                 "type": "keyword"
             },
+            "specifition_name": {
+                "type": "keyword"
+            },
             "is_deleted": {
                "type": "integer"
             },
